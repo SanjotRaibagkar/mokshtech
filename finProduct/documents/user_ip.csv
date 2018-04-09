@@ -1,0 +1,3 @@
+#symbol, start, end, index=False, futures=False, option_type='', expiry_date=None, strike_price='', series='EQ'
+symbol="NIFTY",start=date(2010,1,1),end=date(2017,11,30),index=True
+symbol="SBIN",start=date(2010,1,1),end=date(2017,11,30),index=True
