@@ -1,3 +1,3 @@
-MA,1,3,21-25,
-RSI,1,2,3,4,5
-label,roi
+MA,2,3,60-65
+RSI,1,2
+label,return
