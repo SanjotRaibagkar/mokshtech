@@ -1,0 +1,6 @@
+symbol='NIFTY',start=2010-01-01,end=2017-11-30,index=True
+
+#name='TSLA',data_source='quandl',start=date(2017-10-1),end=date(2017-11-30)
+
+
+#symbol, start, end, index=False, futures=False, option_type='', expiry_date=None, strike_price='', series='EQ'
