@@ -131,7 +131,7 @@ class ml_dpmodels(object):
 
         # Fitting the RNN to the Training set
 
-        regressor.fit(X_train, y_train, epochs = 20, batch_size = 200)
+        regressor.fit(X_train, y_train, epochs = 10, batch_size = 800)
 
         score = regressor.evaluate(X_test, y_test, batch_size=100, verbose=0)
 
@@ -176,8 +176,9 @@ class ml_dpmodels(object):
 
 
         try:
-            self.report_dict[header].set_value(header,'Actual',dataframe[['Close']][-1])
+
             self.report_dict[header].set_value(header,'Forcasted', forcast_stock_price[-1][0])
+            self.report_dict[header].set_value(header, 'Actual', dataframe[['Close']][-2][0])
         except Exception as e:
             print('reporterror',e)
 
@@ -186,7 +187,6 @@ class ml_dpmodels(object):
         print('forcast_stock_price for {0}-D-{2} is {1}'.format(self.predict_days,forcast_stock_price[-1][0],header))
         self.report_dict[header].to_csv(reportpath, mode='a', header=False,index=False)
 
-        exit(1)
 
         # Creating Data Frame for visualisation and storage.
         self.y_test_df['predicted price']=predicted_stock_price
@@ -207,12 +207,12 @@ class ml_dpmodels(object):
         width = 18
         height = 10
 
-        # try:
-        #     result.plot(legend=True, title='Stock Price Prediction ' + header, figsize=(width, height))
-        #     plt.grid(color='b', linestyle='--', linewidth=1)
-        #     #plt.show()
-        #     plt.savefig(repopath+str(date.today())+header+'.png')
-        # except Exception as e:
-        #     print(e)
-        #
-        #
+        try:
+            result.plot(legend=True, title='Stock Price Prediction ' + header, figsize=(width, height))
+            plt.grid(color='b', linestyle='--', linewidth=1)
+            #plt.show()
+            plt.savefig(repopath+str(date.today())+header+'.png')
+        except Exception as e:
+            print(e)
+
+
