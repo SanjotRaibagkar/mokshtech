@@ -1,16 +1,8 @@
 import property
 from property import *
 from stockprediction.technicalanalysis import ta
+import stockprediction.filterreport as fr
 from stockprediction.rnnmodel import ml_dpmodels
-
-
-def create_report(path, header):
-    f = open(path, "w+")
-    f.write(reportcol)
-    f.write('\n')
-    f.close
-
-
 
 def predictstock(symbol):
     b = ta(symbol)
@@ -24,11 +16,12 @@ def predictstock(symbol):
     list(map(funcseries, b.predict_days))
 
 
-create_report(reportpath,reportcol)
+
+fr.create_reportfile(reportpath,reportcol)
 warnings.filterwarnings("ignore")
 try:
+    list(map(predictstock, nonindlist))
     list(map(predictstock, indlist))
-    #list(map(predictstock, nonindlist))
 
 except Exception as e:
     print(e)
