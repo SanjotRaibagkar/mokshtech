@@ -1,12 +1,16 @@
 from property import *
 
+
+
+def create_reportfile(path, header):
+    f = open(path, "w+")
+    f.write(reportcol)
+    f.write('\n')
+    f.close
+
+
 def create_basic_report(report_dict,header):
     rep_header = str(header).split("_")
-    print(header,rep_header)
-    #print('symbol',rep_header[0],'Days',rep_header[1],'RSI',report_dict[2],'BBANDS',rep_header[3],'MA1',rep_header[7:10])
-
-
-
 
     ##Sample header  NIFTY_60_RSI10_BBu-10_BBl_BBs_DailyReturn_MA20_MA50_MA252
 
@@ -39,11 +43,10 @@ def create_report(report_dict,header,x,y):
     finally:
         return(report_dict)
 
+def mod_report(old=reportpath,new=mod_reportpath):
+    df = pd.read_csv(old)
+    mod_df=df.loc[df.groupby(['symbol', 'Days'])['RMSE'].idxmin()]
+    mod_df.to_csv(new,index=False)
+    return(mod_df)
 
 
-
-
-df = pd.read_csv("2018-05-02_technicalreport.csv")
-
-print(df)
-print(df.loc[df.groupby(['symbol', 'Days'])['RMSE'].idxmin()])

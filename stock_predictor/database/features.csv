@@ -1,5 +1,6 @@
-predict_days,60,1,15,22,44
+predict_days,1,15,60
 MA,20-24,50-54,252-253
 RSI,1
 BBANDS,1
-label,return
+label,Close
+n

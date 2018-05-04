@@ -2,7 +2,7 @@ from property import *
 import talib
 import itertools
 from utility import Load_Csv as lcsv
-
+import numpy as np
 
 
 class ta(lcsv.Load_csv):
@@ -11,11 +11,7 @@ class ta(lcsv.Load_csv):
     '''this class contains functions fto predict label with the help of technical indicators'''
     
     def __init__(self,symbol='NIFTY'):
-        file=symbol+'.csv'
         self.filename=os.path.join(stockdata,symbol+'.csv')
-
-
-    
 
     def loadcsv(self):
         '''load 'Date','Close', 'Volume' data from databse and return dataframe
@@ -47,6 +43,7 @@ class ta(lcsv.Load_csv):
             #print(self.dataset)
             #print('row',row)
             comb_dataset=self.dataset.copy()#deep=True)  #Copy basic dataset to comb_dataset
+
             for i in row:
                 #print('i',i)
                 comb_dataset['MA'+str(i)]=self.tdf['MA'+str(i)] # add MA rows from tdf to comb_dataset as per the combination .
@@ -56,19 +53,15 @@ class ta(lcsv.Load_csv):
             #print('self.paneldict',self.paneldict)
             row_s=str(row)
             self.paneldict[row_s]=comb_dataset.copy()#deep=True)  # Now xfer dataframe from comb_dataset to panel_dict 
-            #print('self.paneldict2',self.paneldict)
 
 
         try:
             a=self.tidict['MA']
-            #print('combinations_input',a)
             #[[10],[50],[60-64]]
-            comb_df=pd.Series(list(itertools.product(*a)))##get combinatons 
-            #print('comb_df',comb_df)
+            comb_df=pd.Series(list(itertools.product(*a)))##get combinatons
             comb_df.apply(comb_r)
-            #panel_dataset=pd.Panel(self.paneldict)
-            #print('panel_dataset',panel_dataset)
-         
+            self.combineset=pd.concat([self.dataset,self.tdf], axis=1)   # This dataset contains all the columns in one frame. not used anywhere. made for future purpose.
+
             '''
             ### Error: Panel is not working here . 
             On printing panel it is printing merge of all unique columns for each dataframe.
@@ -122,6 +115,7 @@ class ta(lcsv.Load_csv):
             r_len=len(row)
             ti=row[0]
             rowdf=pd.Series(row[1:])
+            rowdf=rowdf.dropna()
             
                      
             if ti in self.tilist:
@@ -212,6 +206,6 @@ class ta(lcsv.Load_csv):
         self.get_technical_indi()
         self.get_label()
         self.ti_Combinations()
-        return self.paneldict
+        return self.paneldict    # return dictionary of dataframes with key as combination of MA
 
         
