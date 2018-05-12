@@ -3,6 +3,7 @@ import datetime
 from datetime import date
 import property as p
 from utility import downloaddata as dw
+from utility import getDataunit as du
 
 y,m,n=p.y,p.m,p.d
 start=date(y,m,n)
@@ -10,9 +11,7 @@ stockfoldpath=p.stockdata
 
 
 def get_startdate(symbfile,symbol='NIFTY',flag=True):
-    print('searching file at',symbfile)
     if os.path.isfile(symbfile):
-        print(symbfile,' found')
         with open(symbfile) as f:
                 a=f.readlines()
                 if len(a)<2:
@@ -20,9 +19,8 @@ def get_startdate(symbfile,symbol='NIFTY',flag=True):
                     d=start
                 else:
                     y,m,n=(a[-1].strip().split(",")[0]).split("-")
-                    d=date(int(y),int(m),int(n)+1)
-                    d=d+datetime.timedelta(days=1)
-
+                    d=date(int(y),int(m),int(n))
+                    d=d+datetime.timedelta(minutes=du.get_dataunit(symbfile))   # append time diff of two datapointsto get next start date
         return(d)
     else:
         print(symbfile,' file does not exist')

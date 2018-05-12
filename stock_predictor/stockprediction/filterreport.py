@@ -1,12 +1,38 @@
 from property import *
+import property as p
+import utility.getDataunit as du
+import utility.getstart as sdate
+import datetime
+
+techrep=p.techreport
+
 
 
 
 def create_reportfile(path, header):
-    f = open(path, "w+")
-    f.write(reportcol)
-    f.write('\n')
-    f.close
+    if os.path.exists(path):
+        pass
+    else:
+        f = open(path, mode='a')
+        f.write(reportcol)
+        f.write('\n')
+        f.close
+
+def get_forcasted_dates(dates,days):
+    a,b,c = dates[0],dates[1],dates[2]
+
+    if (c-b)< (b-a):
+        width = (c-b).days*24*60
+    else:
+        width = (b-a).days*24*60
+    dates=[]
+    startdate=c
+    for i in range(days):
+        startdate=startdate++datetime.timedelta(minutes=width)
+        dates.append(startdate)
+    return(dates)
+
+
 
 
 def create_basic_report(report_dict,header):
@@ -15,7 +41,7 @@ def create_basic_report(report_dict,header):
     ##Sample header  NIFTY_60_RSI10_BBu-10_BBl_BBs_DailyReturn_MA20_MA50_MA252
 
     report_dict[header] = pd.DataFrame(
-        columns=['symbol', 'Days', 'RSI', 'BBANDS', 'MA1', 'MA2', 'MA3', 'MA4', 'MSE', 'RMSE', 'Actual', 'Forcasted'])
+        columns=['symbol', 'Days', 'RSI', 'BBANDS', 'MA1', 'MA2', 'MA3', 'MA4', 'MSE', 'RMSE','Dates','Actual', 'Forcasted'])
     try:
         report_dict[header].set_value(header, 'symbol', rep_header[0])
         report_dict[header].set_value(header, 'Days', rep_header[1])
@@ -28,6 +54,7 @@ def create_basic_report(report_dict,header):
             report_dict[header].set_value(header, 'MA4', rep_header[9][2:])
         else:
             report_dict[header].set_value(header, 'MA4', '-')
+
     except Exception as e:
         print('basicreporting error',e)
     finally:
@@ -44,8 +71,15 @@ def create_report(report_dict,header,x,y):
         return(report_dict)
 
 def mod_report(old=reportpath,new=mod_reportpath):
-    df = pd.read_csv(old)
+    if os.path.exists(old):
+        df = pd.read_csv(old)
+    else:
+        print(old,' does not exist')
+        print('reading last run file')
+        df = pd.read_csv(techrep)   # if technical file for the current day do not exist then read last run technical file.
+    df=df.drop_duplicates()
     mod_df=df.loc[df.groupby(['symbol', 'Days'])['RMSE'].idxmin()]
+    mod_df = df.sort_values("RMSE")   #Sort DF with least values.
     mod_df.to_csv(new,index=False)
     return(mod_df)
 

@@ -3,7 +3,7 @@ import talib
 import itertools
 from utility import Load_Csv as lcsv
 import numpy as np
-
+import utility.getsymboldata as gs
 
 class ta(lcsv.Load_csv):
     # coding: utf-8
@@ -12,6 +12,17 @@ class ta(lcsv.Load_csv):
     
     def __init__(self,symbol='NIFTY'):
         self.filename=os.path.join(stockdata,symbol+'.csv')
+
+        try:
+            if symbol in indlist:
+                fflag = True
+            else:
+                fflag = False
+            gs.getsymboldata(fflag, symbol)  # Download Latest Data for the symbol
+        except Exception as e:
+            print('getsymbol failed for ',symbol,e)
+
+
 
     def loadcsv(self):
         '''load 'Date','Close', 'Volume' data from databse and return dataframe
@@ -34,25 +45,16 @@ class ta(lcsv.Load_csv):
     
     def ti_Combinations(self):
         '''takes input as list of list and  gives output as comninations '''
-        
-        #print("ti_Combinations")
-
         self.paneldict={}
         def comb_r(row):
-            
-            #print(self.dataset)
-            #print('row',row)
             comb_dataset=self.dataset.copy()#deep=True)  #Copy basic dataset to comb_dataset
-
             for i in row:
-                #print('i',i)
                 comb_dataset['MA'+str(i)]=self.tdf['MA'+str(i)] # add MA rows from tdf to comb_dataset as per the combination .
-                #print('comb_dataset',comb_dataset)
             #print('c',comb_dataset)    #To print dataset with all combinations of MA
-            
+
             #print('self.paneldict',self.paneldict)
             row_s=str(row)
-            self.paneldict[row_s]=comb_dataset.copy()#deep=True)  # Now xfer dataframe from comb_dataset to panel_dict 
+            self.paneldict[row_s]=comb_dataset.copy()#deep=True)  # Now xfer dataframe from comb_dataset to panel_dict
 
 
         try:
@@ -82,6 +84,7 @@ class ta(lcsv.Load_csv):
         '''
         self.featurestilist=[]
         self.misc=[]
+        self.otherindi=[]
         self.label=[]
         self.tilist=dir(talib)
         self.featuredict={}
@@ -90,9 +93,8 @@ class ta(lcsv.Load_csv):
 
          
         def func(value,args):
-           
 
-            if str(value).find("-")>-1:   #tocheck if range is given 
+            if str(value).find("-")>-1:   #tocheck if range is given
                 a,b=value.split("-")
                 a=int(a)
                 b=int(b)
@@ -102,22 +104,18 @@ class ta(lcsv.Load_csv):
                
             else:
                 try:
-                    var=str(args)+'-'+str(int(value))              #togenerate name like MA-1,MA-2  
-
-                    self.featuredict[args].extend(self.loadfeaturesdata(var))
-                    
-                    self.tidict[args].append(self.loadfeaturesdata(var))
+                    var=str(args)+'-'+str(int(value))              #togenerate name like MA-1,MA-2
+                    args_df=pd.Series(self.loadfeaturesdata(var)).dropna().astype('int64').tolist()
+                    self.featuredict[args].extend(args_df)
+                    self.tidict[args].append(args_df)
                 except Exception as e:
-                    pass  
-        
-        
+                    pass
+
         def funr(row):
-            r_len=len(row)
             ti=row[0]
             rowdf=pd.Series(row[1:])
             rowdf=rowdf.dropna()
-            
-                     
+
             if ti in self.tilist:
                 self.featuredict[ti]=[]
                 self.tidict[ti]=[]
@@ -128,7 +126,14 @@ class ta(lcsv.Load_csv):
             elif ti=='label':
                 self.label.append(row[1])
             elif ti == 'predict_days':
-                self.predict_days = row[1:].tolist()
+                predict_days = pd.Series(row[1:])
+                predict_days =predict_days.dropna()
+
+                self.predict_days=predict_days.values.tolist()
+            elif ti == 'others':
+                others  = pd.Series(row[1:])
+                others = others.dropna()
+                self.otherindi = others.values.tolist()
             else:
                 self.misc.append(row)
     
@@ -178,33 +183,37 @@ class ta(lcsv.Load_csv):
 
     def get_technical_indi(self):
         
-        self.tdf=self.LoadData(self.filename).loc[:, ['Close']]
+        self.tdf=self.LoadData(self.filename).loc[:, [self.get_label()]]
         for i in self.featurestilist:
             if i=='MA':
-                self.get_MA('Close')
+                self.get_MA(self.get_label())
             if i=='RSI':
-                self.get_RSI('Close')
+                self.get_RSI(self.get_label())
             if i == 'BBANDS':
-                self.get_BBANDS('Close')
+                self.get_BBANDS(self.get_label())
                 
                 
     def get_return(self):
-        self.dataset['DailyReturn'] = self.dataset['Close'].pct_change()
+        self.dataset['DailyReturn'] = self.dataset[self.get_label()].pct_change()
         
         
     def get_label(self):
         print("start technical analysis and  Calculate technical indicators")
-        if self.label[0]=='return':
-            self.get_return()
-        #print(self.dataset)
-        #print(self.tdf)
-        #print(self.tidict)
+        return(self.label[0])
+
+
+    def get_otherindi(self):
+        for i in self.otherindi:
+            if i == 'dreturn':
+                self.get_return()
+
        
     def get_panel_data(self):
         self.loadcsv()
         self.loadfeatures()
         self.get_technical_indi()
         self.get_label()
+        self.get_otherindi()
         self.ti_Combinations()
         return self.paneldict    # return dictionary of dataframes with key as combination of MA
 

@@ -3,6 +3,7 @@ from property import *
 from stockprediction.technicalanalysis import ta
 import stockprediction.filterreport as fr
 from stockprediction.rnnmodel import ml_dpmodels
+import timeit
 
 def predictstock(symbol):
     b = ta(symbol)
@@ -18,11 +19,20 @@ def predictstock(symbol):
 
 
 
-fr.create_reportfile(reportpath,reportcol)
-warnings.filterwarnings("ignore")
-try:
-    list(map(predictstock, nonindlist))
-    list(map(predictstock, indlist))
+def run_predictstock():
+    fr.create_reportfile(reportpath,reportcol)
+    warnings.filterwarnings("ignore")
+    try:
+        noninddf=pd.Series(nonindlist)
+        indlistdf=pd.Series(indlist)
+        noninddf.apply(predictstock)
+        indlistdf.apply(predictstock)
 
-except Exception as e:
-    print(e)
+        # list(map(predictstock, nonindlist))
+        # list(map(predictstock, indlist))
+
+    except Exception as e:
+        print(e)
+
+if __name__ == '__main__':
+    run_predictstock()

@@ -10,7 +10,6 @@ from datetime import date
 import pickle
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
 from stockprediction import filterreport as fr
 from property import *
 import property as p
@@ -34,7 +33,7 @@ class ml_dpmodels(object):
 
             pass
         else:
-            train_paneldict=train_paneldict.iloc[:-self.predict_days, 0:1]     #for predict model building, crop the dataset by no of days
+            train_paneldict=train_paneldict.iloc[:-self.predict_days, :]     #for predict model building, crop the dataset by no of days
         df_total = train_paneldict.iloc[:,:]
         y = train_paneldict.iloc[self.predict_days:, 0:1] #Close  # implement method to get label from file
         self.df=df_total.iloc[:-self.predict_days,:]
@@ -72,14 +71,14 @@ class ml_dpmodels(object):
         
         #Creating data sctructure for test and training
         X_train, X_test, y_train, y_test = train_test_split(df_scaled, y_scaled, test_size=test_size)
-        X_train, y_train ,X_test = np.array(X_train), np.array(y_train), np.array(X_test)
+        X_train, y_train = np.array(X_train), np.array(y_train)
 
 
        #Reshape xtrain and xtest to fit in lstm model
-        #
-        # X_train = np.reshape(X_train, (X_train.shape[0],1, X_train.shape[1]))
-        # X_test = np.reshape(X_test, (X_test.shape[0],1, X_test.shape[1]))
-        # forcast_scaled = np.reshape(forcast_scaled, (forcast_scaled.shape[0], 1,forcast_scaled.shape[1]))
+
+        X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1))
+        X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
+        forcast_scaled = np.reshape(forcast_scaled, (forcast_scaled.shape[0], forcast_scaled.shape[1], 1))
 
         print(X_train.shape,X_test.shape,y_train.shape,y_test.shape,df_scaled.shape,y_scaled.shape)
         self.X_test , self.X_train , self.y_test , self.y_train ,self.forcast_scaled = X_test , X_train , y_test , y_train ,forcast_scaled
@@ -97,16 +96,41 @@ class ml_dpmodels(object):
         # Initialising the RNN
 
         X_test , X_train , y_test , y_train,forcast_scaled,header  = self.data_preprocessing(dataframe,skipdays)
-        clf = RandomForestClassifier(n_estimators=1000, n_jobs=-1)
-        clf.fit(X_train, y_train)
-        print('v')
+        regressor = Sequential()
 
-        score = accuracy = clf.score(X_test, y_test)
-        print('w')
-        print(clf.predict(X_test))
+        # Adding the first LSTM layer and some Dropout regularisation
+        regressor.add(LSTM(units = 50, return_sequences = True, input_shape = (X_train.shape[1], 1)))
+        regressor.add(Dropout(dropoutunit))
 
-        return accuracy
+        LSTM_units=50
+        LSTM_units=LSTM_units+LSTM_unit_increment
 
+        # Adding a second LSTM layer and some Dropout regularisation
+        regressor.add(LSTM(units = LSTM_units, return_sequences = True))
+        regressor.add(Dropout(dropoutunit))
+
+        # Adding a third LSTM layer and some Dropout regularisation
+        LSTM_units=LSTM_units+LSTM_unit_increment
+
+        regressor.add(LSTM(units = LSTM_units, return_sequences = True))
+        regressor.add(Dropout(dropoutunit))
+
+        # Adding a fifth LSTM layer and some Dropout regularisation
+        LSTM_units=LSTM_units+LSTM_unit_increment
+        regressor.add(LSTM(units = LSTM_units))
+        regressor.add(Dropout(dropoutunit))
+
+        #print(X_train.shape,y_train.shape)
+        # Adding the output layer
+        regressor.add(Dense(units = 1))
+
+        # Compiling the RNN
+        regressor.compile(optimizer = 'adam', loss = 'mean_squared_error')
+
+        # Fitting the RNN to the Training set
+        regressor.fit(X_train, y_train, epochs = p.epochs, batch_size = 300)
+        print('rnn model build')
+        score = regressor.evaluate(X_test, y_test, batch_size=100, verbose=0)
 
         # Result (MSE adn RMSE)
         TM_MSE = score
@@ -115,7 +139,7 @@ class ml_dpmodels(object):
         self.report_dict = fr.create_basic_report(self.report_dict,header)
         self.report_dict = fr.create_report(self.report_dict, header,'MSE',TM_MSE)
         self.report_dict = fr.create_report(self.report_dict, header,'RMSE',TM_RMSE)
-        return(clf,X_test , X_train , y_test , y_train,forcast_scaled,header)
+        return(regressor,X_test , X_train , y_test , y_train,forcast_scaled,header)
 
     def predict_forcast(self,dataframe,skipdays):
 

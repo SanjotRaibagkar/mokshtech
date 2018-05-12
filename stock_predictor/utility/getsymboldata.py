@@ -26,15 +26,16 @@ def getsymboldata(flag,symbol):
         dw.down_data(symbfile,symbol,flag,startdate=startdate,headerflag=False)
 
 
-
-try:
-    ind = lambda lst: getsymboldata(True, lst)
-    list(map(ind, indlist))
-    nonind = lambda lst: getsymboldata(False, lst)
-    list(map(nonind, nonindlist))
-except Exception as e:
-    print(e)
-
-
+def run_getsymboldata():
+    try:
+        ind = lambda lst: getsymboldata(True, lst)
+        list(map(ind, indlist))
+        nonind = lambda lst: getsymboldata(False, lst)
+        list(map(nonind, nonindlist))
+    except Exception as e:
+        print(e)
 
 
+
+if __name__ == '__main__':
+    run_getsymboldata()
