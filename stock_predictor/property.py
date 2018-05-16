@@ -67,7 +67,7 @@ test_size=0.3
 LSTM_units = 50
 LSTM_unit_increment = 30
 dropoutunit = 0.2
-epochs=1
+epochs=20
 
 
 ################## Random Forest Property #########################

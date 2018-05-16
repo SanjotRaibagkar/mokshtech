@@ -1,7 +1,7 @@
 # Importing the Keras libraries and packages
 
 import shutil
-
+from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.ensemble import VotingClassifier
@@ -206,20 +206,20 @@ class ml_dpmodels(object):
         width = 18
         height = 10
 
-        # try:
-        #     result.plot(legend=True, title='Stock Price Prediction ' + header, figsize=(width, height))
-        #     plt.grid(color='b', linestyle='--', linewidth=1)
-        #     #plt.show()
-        #
-        #     if self.flag:
-        #         imgpath = os.path.join(repobasepath, 'finalimgs')
-        #         imgpath = os.path.join(imgpath, +str(date.today()) + header + '_final.png')
-        #     else:
-        #         imgpath = os.path.join(repobasepath, 'imgs')
-        #         imgpath = os.path.join(imgpath,+str(date.today())+header+'.png')
-        #     plt.savefig(imgpath)
-        # except Exception as e:
-        #     print(e)
+        try:
+            result.plot(legend=True, title='Stock Price Prediction ' + header, figsize=(width, height))
+            plt.grid(color='b', linestyle='--', linewidth=1)
+            #plt.show()
+
+            if self.flag:
+                imgpath = os.path.join(repobasepath, 'finalimgs')
+                imgpath = os.path.join(imgpath, +str(date.today()) + header + '_final.png')
+            else:
+                imgpath = os.path.join(repobasepath, 'imgs')
+                imgpath = os.path.join(imgpath,+str(date.today())+header+'.png')
+            plt.savefig(imgpath)
+        except Exception as e:
+            print(e)
 
 
 
