@@ -54,7 +54,6 @@ def final_run(forcastflag=False):
     try:
         mod_df=fr.mod_report()
         mod_df.apply(c_moddict,axis=1)
-
         fr.create_reportfile(final_reportpath,reportcol)
         warnings.filterwarnings("ignore")
         mod_df.apply(funr, axis=1)

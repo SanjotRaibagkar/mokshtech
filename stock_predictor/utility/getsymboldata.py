@@ -19,8 +19,11 @@ def getsymboldata(flag,symbol):
     print(symbfile)
     startdate=gs.get_startdate(symbfile,symbol,flag)
     print('startdate',startdate)
-    if date.today()==startdate:
+    datediff = ((date.today()-startdate).days)*24*60
+    if datediff==0:
         print('updated data present')
+    elif 1 < datediff < 1440 :
+        pass                # Made temporary changes  for 5 mins and 1 min data
     else:
         print('downloading delta data')
         dw.down_data(symbfile,symbol,flag,startdate=startdate,headerflag=False)

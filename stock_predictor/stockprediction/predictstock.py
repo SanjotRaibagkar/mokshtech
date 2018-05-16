@@ -6,10 +6,10 @@ from stockprediction.rnnmodel import ml_dpmodels
 import timeit
 
 def predictstock(symbol):
+
     b = ta(symbol)
     data = b.get_panel_data()
     skip_days = sorted([(sorted(v).pop()) for k, v in b.featuredict.items()]).pop()
-    print(skip_days)
 
     def funcseries(x):
         t = ml_dpmodels(int(x), symbol)
