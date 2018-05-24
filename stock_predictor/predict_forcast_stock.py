@@ -14,14 +14,14 @@ if __name__ == '__main__':
     print(sys.argv)
     try:
         assert sys.argv[1]=='p' or sys.argv[1]=='f'
-        from stockprediction import predictstock as ps
-        from stockprediction import forcaststock as fs
+        from stockprediction import exe_predictstock as ex_p
+        from stockprediction import exe_forcaststock as fs
 
         if sys.argv[1]=='p':
             if sys.argv[2]!='x':
-                ps.predictstock(sys.argv[2])
+                ex_p.predictstock(sys.argv[2])
             else:
-                ps.run_predictstock()
+                ex_p.exe_predictstock()
             if sys.argv[3]=='f':
                 if sys.argv[4]!='x':
                     fs.final_run(sys.argv[4],sys.argv[5])

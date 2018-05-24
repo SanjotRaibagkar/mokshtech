@@ -1,18 +1,15 @@
 import numpy as np
-
-from sklearn.ensemble import RandomForestRegressor
-from sklearn import preprocessing
-from sklearn import neighbors
-from sklearn.ensemble import AdaBoostClassifier
-from sklearn import svm
-from sklearn import model_selection
-from sklearn.metrics import mean_squared_error
-
-from keras.layers.core import Dense, Activation, Dropout
+from keras.layers.core import Dense, Dropout
 from keras.layers.recurrent import LSTM
 from keras.models import Sequential
+from sklearn import neighbors
+from sklearn import svm
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
 
 import property as p
+
 
 def buildModel(X_train, X_test, y_train, y_test, forcast_scaled, method):
     """
@@ -55,7 +52,7 @@ def performRFR(X_train, X_test, y_train, y_test):
     model = RandomForestRegressor(n_estimators=num_trees, n_jobs=njobs)
     model.fit(X_train, y_train)
     MSE = mse_error(y_test,X_test,model)
-    return (model,MSE)
+    return model, MSE
 
 def performRNNlass(X_train, X_test, y_train, y_test, forcast_scaled):
 
@@ -109,7 +106,7 @@ def performSVR(X_train, X_test, y_train, y_test):
         model = svm.SVR(kernel='rbf', C=1e3, gamma=0.1)
         model.fit(X_train, y_train)
         MSE = mse_error(y_test,X_test,model)
-        return (model, MSE)
+        return model, MSE
 
 def performKNNClass(X_train, y_train, X_test, y_test, parameters):
     """
