@@ -30,9 +30,6 @@ def exe_predictstock():
         noninddf.apply(predictstock)
         indlistdf.apply(predictstock)
 
-        # list(map(predictstock, nonindlist))
-        # list(map(predictstock, indlist))
-
     except Exception as e:
         print(e)
 

@@ -47,12 +47,10 @@ class pv_visualise(object):
         #target_testDF['y_test'] = y_test
         #result = pd.concat([df, target_testDF], axis=1)
         #result = result.rename(columns={'Close': 'Real test  Price'})
-        print('12')
         if not self.flag:
             dates = DF.tail(n=self.predict_days).index
         else:
             dates = fr.get_forcasted_dates((target_testDF.index[-3:]), self.predict_days)  # Get dates for forcased values
-        print('2')
         fs_df = pd.DataFrame(index=dates)
         fs_df.index = pd.to_datetime(fs_df.index)
 
@@ -81,7 +79,7 @@ class pv_visualise(object):
             self.report_dict[header].to_csv(reportpath, mode='a', header=False, index=False)
             shutil.copyfile(reportpath, techreport)
 
-        # Visualising the results
+        #Visualising the results
         width = 18
         height = 10
         try:

@@ -19,6 +19,7 @@ warnings.filterwarnings("ignore")
 ##File Path
 
 basepath=os.path.dirname(os.path.abspath('.'))
+#basepath="\\Users\\sanjotraibagkar\\Documents\\sanjot\\Mokssoftware\\Phase1-StockPrediction\\shashkcode\\mokshtech"
 if str(basepath).split("\\")[-1] == "mokshtech":
     basepath = os.path.join(basepath,"stock_predictor")
 
@@ -29,8 +30,8 @@ if str(basepath).split("\\")[-1] == "mokshtech":
 #     basepath=""
 
 dbpath=os.path.join(basepath,'database')
-stockdata=os.path.join(dbpath,'stockdata')
-#stockdata=os.path.join(dbpath,'stockdata_1')
+#stockdata=os.path.join(dbpath,'stockdata')
+stockdata=os.path.join(dbpath,'stockdata_1')
 featurescsv=os.path.join(dbpath,'features.csv')
 featuresdata=os.path.join(dbpath,'featuresdata.csv')
 repobasepath = os.path.join(basepath,'report')
@@ -60,7 +61,7 @@ mod_reportpath = os.path.join(repobasepath,mod_reportname)
 final_reportpath = os.path.join(repobasepath,final_reportname)
 
 ########Get symboldata property###################################
-y=2011
+y=2007
 m=1
 d=1
 
@@ -71,7 +72,8 @@ test_size=0.3
 LSTM_units = 50
 LSTM_unit_increment = 30
 dropoutunit = 0.2
-epochs=1
+epochs=20
+batch_size=500
 
 
 ################## Random Forest Property #########################
@@ -87,4 +89,4 @@ gamma=0.3
 
 ##################### Model List ####################################
 modelslist=['SVR','RF','RNN']   # This is list of all the models
-models=['SVR']      # This is list of models to be used at run time.
+models=['RNN']      # This is list of models to be used at run time.

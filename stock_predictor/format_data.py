@@ -15,11 +15,12 @@ def format_data():
                 fnew=os.path.join(dirpath,name+'.csv')
                 os.rename(fold,fnew)
                 df=pd.read_csv(fnew)
-                df.columns=header
+                if df[0,0]!='Symbol':
+                    df.columns=header
                 df['Date']=pd.to_datetime(df['Date'].astype(str)+' '+df['Time'].astype(str))
                 df=df.set_index('Date')
                 df=df.drop(['Time'],axis=1)
                 df=df[~df.index.duplicated(keep='last')]
                 df=df.drop_duplicates(keep='last')
-                df.to_csv(fnew,mode='w',header=True,index=True)
+                to_csv(fnew,mode='w',header=True,index=True)
 

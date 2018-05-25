@@ -2,10 +2,6 @@ import property as p
 from property import *
 
 techrep=p.techreport
-
-
-
-
 def create_reportfile(path, header):
     if os.path.exists(path):
         pass
@@ -25,40 +21,28 @@ def get_forcasted_dates(dates,days):
     """
 
     a,b,c = dates[0],dates[1],dates[2]
-    if (c-b) or (b-a) == 0:
-        if (c - b) > (b - a):
-            width = (c - b).seconds
+
+    if (b - a) < (c - b):
+        if b != a:
+            diff = b - a
         else:
-            width = (b - a).seconds
-    elif (c-b)< (b-a):
-        width = (c - b).seconds
+            diff = c - b
+    elif c != b:
+        diff = c - b
     else:
-        width = (b - a).seconds
+        diff = b - a
 
-    #
-    #
-    # if (c-b)< (b-a):
-    #     if c!=b:
-    #         width = (c-b).seconds
-    #     else:
-    #         width = (b - a).seconds
-    #
-    #
-    # elif b!=a:
-    #      width = (b-a).seconds
-    # else:
-    #     width = (c-b).seconds
+    widthdays = diff.days * 24 * 60
+    width = (diff.seconds) // 60
 
-    width = width//60
-
+    width += widthdays
 
     startdate=c
     if width==1440:
         ndates=pd.bdate_range(startdate,periods=days+1)
     else:
-        print(width)
+        print(a,b,c,width)
         ndates=pd.date_range(startdate,freq=pd.DateOffset(minutes=width),periods=(days+1))
-        print(ndates)
     return ndates[1:]
 
 def create_basic_report(report_dict,header):

@@ -95,7 +95,7 @@ def performRNNlass(X_train, X_test, y_train, y_test, forcast_scaled):
     regressor.compile(optimizer='adam', loss='mean_squared_error')
 
     # Fitting the RNN to the Training set
-    regressor.fit(X_train, y_train, epochs=p.epochs, batch_size=300)
+    regressor.fit(X_train, y_train, epochs=p.epochs, batch_size=p.batch_size)
     print('rnn model build',X_test.shape)
 
 

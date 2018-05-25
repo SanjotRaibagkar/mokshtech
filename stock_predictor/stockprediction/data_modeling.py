@@ -86,5 +86,9 @@ class build_predictmodel(object):
         self.report_dict = fr.create_basic_report(self.report_dict, header)
         self.report_dict = fr.create_report(self.report_dict, header, 'MSE', TM_MSE)
         self.report_dict = fr.create_report(self.report_dict, header, 'RMSE', TM_RMSE)
+        self.report_dict = fr.create_report(self.report_dict, header, 'RMSE', TM_RMSE)
+        self.report_dict = fr.create_report(self.report_dict, header, 'model', p.models[0])
+
+
         return regressor, X_train, X_test, y_train, y_test, forcast_ip_scaled, header,self.report_dict
 

@@ -13,12 +13,35 @@ def get_dataunit(path):
     b = df.iloc[2]
     c = df.iloc[3]
 
-    diff=((b-a).seconds)//60
-    diff1=((c-b).seconds)//60
-    if diff < diff1:     # Return least diff to avoid holiday gap.
-        return (diff)
+    # diff =((b-a).seconds)//60
+    # diff1=((c-b).seconds)//60
+    # if diff < diff1:     # Return least diff to avoid holiday gap.
+    #     print('diff',diff)
+    #     return (diff)
+    # else:
+    #     print('diff1',diff1)
+    #
+    #     return (diff1)
+
+
+    if (b-a)<(c-b):
+        if b != a:
+            diff = b-a
+        else:
+            diff = c-b
+    elif c != b:
+        diff = c-b
     else:
-        return (diff1)
+        diff = b-a
+
+    widthdays = diff.days*24*60
+    widthmin = (diff.seconds)//60
+
+    widthmin += widthdays
+    return widthmin
+
+
+
 
 if __name__ == '__main__':
     get_dataunit(path)

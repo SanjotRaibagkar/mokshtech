@@ -13,7 +13,7 @@ from property import *
 
 
 def getsymboldata(flag,symbol):
-    print(flag,symbol)
+    print(symbol)
     '''This is only for the development purpose. Idea is to fetch data via frontend code and dump in csv.
     till the time that code is ready we will use this. Once frontend gets ready we will retire code'''
     symbfile=os.path.join(stockdata,symbol+'.csv')
