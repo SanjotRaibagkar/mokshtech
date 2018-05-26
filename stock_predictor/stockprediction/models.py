@@ -1,7 +1,5 @@
 import numpy as np
-from keras.layers.core import Dense, Dropout
-from keras.layers.recurrent import LSTM
-from keras.models import Sequential
+
 from sklearn import neighbors
 from sklearn import svm
 from sklearn.ensemble import AdaBoostClassifier
@@ -56,6 +54,10 @@ def performRFR(X_train, X_test, y_train, y_test):
 
 def performRNNlass(X_train, X_test, y_train, y_test, forcast_scaled):
 
+    from keras.layers.core import Dense, Dropout
+    from keras.layers.recurrent import LSTM
+    from keras.models import Sequential
+
     X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1))
     X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
     forcast_scaled = np.reshape(forcast_scaled, (forcast_scaled.shape[0], forcast_scaled.shape[1], 1))
@@ -103,7 +105,7 @@ def performRNNlass(X_train, X_test, y_train, y_test, forcast_scaled):
     return regressor,score,X_train, X_test, y_train, y_test,forcast_scaled
 
 def performSVR(X_train, X_test, y_train, y_test):
-        model = svm.SVR(kernel='rbf', C=1e3, gamma=0.1)
+        model = svm.SVR(kernel='rbf', C=1e3, gamma=0.5,epsilon=p.epsilon)
         model.fit(X_train, y_train)
         MSE = mse_error(y_test,X_test,model)
         return model, MSE

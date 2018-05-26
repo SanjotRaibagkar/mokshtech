@@ -1,6 +1,7 @@
 test,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
 predict_days,15,1
+MA,1,2,3
+RSI,2
 BBANDS,1
 label,Close
-others,dreturn
 dffeatures,Close,Open,High,Low,Volume,Date

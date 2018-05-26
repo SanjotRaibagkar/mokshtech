@@ -207,7 +207,6 @@ class ta(lcsv.Load_csv):
 
     def get_otherindi(self):
         for i in self.otherindi:
-            print(i)
             if i == 'dreturn':
                 self.get_return()
 

@@ -21,13 +21,13 @@ class pv_visualise(object):
         predicted_stock_price = regressor.predict(X_test)    #This should be from row no 2 to 9
         if (len(predicted_stock_price.shape)) < 2:
             predicted_stock_price = np.reshape(predicted_stock_price, (predicted_stock_price.shape[0], 1))
-        predicted_stock_price = sc.inverse_transform(predicted_stock_price)
+        predicted_stock_price = sc.inverse_transform(predicted_stock_price).round(2)
 
         forcast_target_price = regressor.predict(forcast_ip_scaled)     #This should give row no 10 for 9th row input
         if len(forcast_target_price.shape) < 2:
             forcast_target_price = np.reshape(forcast_target_price, (forcast_target_price.shape[0], 1))
 
-        forcast_target_price = sc.inverse_transform(forcast_target_price)  #This should give row no 10
+        forcast_target_price = sc.inverse_transform(forcast_target_price).round(2)  #This should give row no 10
 
         y_test = sc.inverse_transform(y_test)
 
@@ -48,31 +48,35 @@ class pv_visualise(object):
         #result = pd.concat([df, target_testDF], axis=1)
         #result = result.rename(columns={'Close': 'Real test  Price'})
         if not self.flag:
+            #Get last n dates
             dates = DF.tail(n=self.predict_days).index
         else:
-            dates = fr.get_forcasted_dates((target_testDF.index[-3:]), self.predict_days)  # Get dates for forcased values
-        fs_df = pd.DataFrame(index=dates)
-        fs_df.index = pd.to_datetime(fs_df.index)
+            # Get future n dates for forcased values
+            dates = fr.get_forcasted_dates((target_testDF.index[-3:]), self.predict_days)
 
-        fs_df['forcast_stock_price'] = forcast_target_price
+        fs_df = pd.DataFrame(index=dates)
+        fs_df['forcast_stock_price'] = forcast_target_price.round(2)
         result = pd.concat([df, fs_df], axis=1)
         print('predict', predicted_stock_price[-1])
         print('ytest', y_test[-1])
-        print('forcast', forcast_target_price[-1])
+        print('forcast', fs_df['forcast_stock_price'][0])
         if not self.flag:
             actual_price = DF.iloc[-self.predict_days:, 0:1].rename(columns={'Close': 'ActualPrice'})
             result = pd.concat([result, actual_price], axis=1)
-            print('actual', actual_price['ActualPrice'][-1])
+            print('actual', actual_price['ActualPrice'][0])
+
+
         try:
 
-            self.report_dict = fr.create_report(self.report_dict, header, 'Dates', fs_df.index.values)
-            self.report_dict = fr.create_report(self.report_dict, header, 'Forcasted', forcast_target_price.tolist())
+
+            self.report_dict = fr.create_report(self.report_dict, header, 'Dates', fs_df.index.values.astype('datetime64[m]'))
+            self.report_dict = fr.create_report(self.report_dict, header, 'Forcasted', fs_df['forcast_stock_price'].tolist())
             if not self.flag:
                 self.report_dict = fr.create_report(self.report_dict, header, 'Actual', actual_price['ActualPrice'].values.tolist())
         except Exception as e:
             print('reporterror', e)
-        print('forcast_stock_price for {0}-D-{2} is {1} for {3}'.format(self.predict_days, forcast_target_price, header,
-                                                                        fs_df.index.values))
+        print('forcast_stock_price for {0}-D-{2} is {1} for {3}'.format(self.predict_days, fs_df['forcast_stock_price'].tolist(), header,
+                                                                        fs_df.index.values.astype('datetime64[m]')))
         if self.flag:
             self.report_dict[header].to_csv(final_reportpath, mode='a', header=False, index=False)
         else:

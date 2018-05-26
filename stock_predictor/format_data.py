@@ -13,14 +13,17 @@ def format_data():
             if ext == '.txt':
                 fold=os.path.join(dirpath,fold)
                 fnew=os.path.join(dirpath,name+'.csv')
+                if os.path.exists(fnew):
+                    os.remove(fnew)
                 os.rename(fold,fnew)
                 df=pd.read_csv(fnew)
-                if df[0,0]!='Symbol':
+                if df.iloc[0,0]!='Symbol':
                     df.columns=header
                 df['Date']=pd.to_datetime(df['Date'].astype(str)+' '+df['Time'].astype(str))
                 df=df.set_index('Date')
+                df.index=pd.to_datetime(df.index)
                 df=df.drop(['Time'],axis=1)
                 df=df[~df.index.duplicated(keep='last')]
                 df=df.drop_duplicates(keep='last')
-                to_csv(fnew,mode='w',header=True,index=True)
+                df.to_csv(fnew,mode='w',header=True,index=True)
 

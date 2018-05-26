@@ -39,26 +39,28 @@ def get_forcasted_dates(dates,days):
 
     startdate=c
     if width==1440:
-        ndates=pd.bdate_range(startdate,periods=days+1)
+        ndates=pd.bdate_range(startdate,dtype='datetime64[s]',periods=days+1)
+
     else:
         print(a,b,c,width)
-        ndates=pd.date_range(startdate,freq=pd.DateOffset(minutes=width),periods=(days+1))
+        ndates=pd.date_range(startdate,dtype='datetime64[s]',freq=pd.DateOffset(minutes=width),periods=(days+1))
     return ndates[1:]
 
 def create_basic_report(report_dict,header):
-    ##Sample  header = 'NIFTY-60-RSI10-BBu_10-BBl-BBs-MA20-MA50-MA252'
+    ##Sample  header = 'NIFTY-60-RSI10-BBu_10-BBl-BBs-MA20-MA50-MA252-RVR'
 
     rep_header = (header).split("-")
     report_dict[header] = pd.DataFrame(
         columns=p.reportcol)
-
-
-    collist=rep_header[2:]
+    collist=rep_header[2:-1]
 
     try:
         report_dict[header].set_value(header, 'symbol', rep_header[0])
         report_dict[header].set_value(header, 'Days', rep_header[1])
-        while(len(collist)):
+        report_dict[header].set_value(header, 'model', rep_header[-1])
+
+
+        while(len(collist)>1):
             if collist[0].startswith('RSI'):
                 report_dict[header].set_value(header, 'RSI', collist[0][3:])
                 collist.pop(0)
@@ -68,23 +70,27 @@ def create_basic_report(report_dict,header):
             elif collist[0].startswith('MA'):
                 report_dict[header].set_value(header, 'MA1', collist[0][2:])
                 collist.pop(0)
-                if collist[0].startswith('MA'):
-                    report_dict[header].set_value(header, 'MA2', collist[0][2:])
-                    collist.pop(0)
-                if collist[0].startswith('MA'):
-                    report_dict[header].set_value(header, 'MA3', collist[0][2:])
-                    collist.pop(0)
-                if collist[0].startswith('MA'):
-                    report_dict[header].set_value(header, 'MA4', collist[0][2:])
-                    collist.pop(0)
+                try:
+                    if collist[0].startswith('MA'):
+                        report_dict[header].set_value(header, 'MA2', collist[0][2:])
+                        collist.pop(0)
+                    if collist[0].startswith('MA'):
+                        report_dict[header].set_value(header, 'MA3', collist[0][2:])
+                        collist.pop(0)
+                    if collist[0].startswith('MA'):
+                        report_dict[header].set_value(header, 'MA4', collist[0][2:])
+                        collist.pop(0)
+                except IndexError as e:
+                    pass
             else:
                 collist.pop(0)
 
 
+    except IndexError as e:
+        pass
     except Exception as e:
         print('basicreporting error',e)
     finally:
-
         return report_dict
 
 

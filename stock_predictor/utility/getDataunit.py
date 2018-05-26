@@ -13,17 +13,6 @@ def get_dataunit(path):
     b = df.iloc[2]
     c = df.iloc[3]
 
-    # diff =((b-a).seconds)//60
-    # diff1=((c-b).seconds)//60
-    # if diff < diff1:     # Return least diff to avoid holiday gap.
-    #     print('diff',diff)
-    #     return (diff)
-    # else:
-    #     print('diff1',diff1)
-    #
-    #     return (diff1)
-
-
     if (b-a)<(c-b):
         if b != a:
             diff = b-a
