@@ -1,8 +1,10 @@
 
 import shutil
 
-from matplotlib import pyplot as plt
 
+#from matplotlib import pyplot as plt
+#from seaborn import palplot as plt
+from bokeh import plotting as plt
 from property import *
 from stockprediction import reporting as fr
 

@@ -27,6 +27,14 @@ def get_date(symbfile):
     return d
 
 def get_startdate(symbfile,symbol='NIFTY',flag=True):
+    '''
+
+    :param symbfile:
+    :param symbol:
+    :param flag:
+    :return: 1. If file exist than last date in file
+             2. Else date from where we need to download
+    '''
     if os.path.isfile(symbfile):
         d=get_date(symbfile)
         return(d)

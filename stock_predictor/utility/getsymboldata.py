@@ -17,13 +17,15 @@ def getsymboldata(flag,symbol):
     '''This is only for the development purpose. Idea is to fetch data via frontend code and dump in csv.
     till the time that code is ready we will use this. Once frontend gets ready we will retire code'''
     symbfile=os.path.join(stockdata,symbol+'.csv')
-    startdate=gs.get_startdate(symbfile,symbol,flag)
+    startdate=gs.get_startdate(symbfile,symbol,flag) # date from where we need to download
     print('startdate',startdate)
     datediff = ((date.today()-startdate).seconds)//60
-    if datediff==0:
+    if datediff == 0: # for days the above statement will give zero so calculate once more
+        datediff = ((date.today()-startdate).days)*24*60*60
+    if datediff == 0:
         print('updated data present')
     elif 1 < datediff < 1440 :
-        pass                # Made temporary changes  for 5 mins and 1 min data
+        pass                # Place holder for 5 mins and 1 min data download code.
     else:
         print('downloading delta data')
         dw.down_data(symbfile,symbol,flag,startdate=startdate,headerflag=False)

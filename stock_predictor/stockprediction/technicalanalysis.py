@@ -65,14 +65,18 @@ class ta(lcsv.Load_csv):
 
             # print('self.paneldict',self.paneldict)
             row_s = str(row)
-            self.paneldict[
-                row_s] = comb_dataset.copy()  # deep=True)  # Now xfer dataframe from comb_dataset to panel_dict
+            self.paneldict[row_s] = comb_dataset.copy()  # deep=True)  # Now xfer dataframe from comb_dataset to panel_dict
+        comb_df_uni=[]
+        def drop_dupes(row):
+            if len(row) == len(set(row)):
+                comb_df_uni.append(row)
 
         try:
             if 'MA' in self.tidict.keys():
                 a = self.tidict['MA']
                 # [[10],[50],[60-64]]
-                comb_df = pd.Series(list(itertools.product(*a)))  ##get combinatons
+                pd.Series(list(itertools.product(*a))).apply(drop_dupes)  ##get combinatons
+                comb_df = pd.Series(comb_df_uni)
                 comb_df.apply(comb_r)
                 self.combineset = pd.concat([self.dataset, self.tdf],
                                             axis=1)  # This dataset contains all the columns in one frame. not used anywhere. made for future purpose.
