@@ -23,14 +23,16 @@ basepath=os.path.dirname(os.path.abspath('.'))
 if str(basepath).split("\\")[-1] == "mokshtech":
     basepath = os.path.join(basepath,"stock_predictor")
 
-#
-# if socket.gethostname()=='shashank':
-#     basepath="C:\\Prgs\\Code\\mokshtech\\stock_predictor\\"                   #############This needs to be adjusted as per user.
-# else:
-#     basepath=""
+basepathlist = str(basepath).split("\\")
+if basepathlist[-1] != "stock_predictor" and basepathlist.__contains__("stock_predictor"):
+    while(basepathlist[-1] != "stock_predictor"):
+        basepathlist.pop()
+basepath=("\\").join(basepathlist)
+
 
 dbpath=os.path.join(basepath,'database')
 stockdata=os.path.join(dbpath,'stockdata')
+optiondata = os.path.join(dbpath,'optionData')
 #stockdata=os.path.join(dbpath,'stockdata_1')
 featurescsv=os.path.join(dbpath,'features.csv')
 featuresdata=os.path.join(dbpath,'featuresdata.csv')
