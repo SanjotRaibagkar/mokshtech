@@ -15,8 +15,11 @@ stockfoldpath=p.stockdata
 def get_date(symbfile,Options):
 
     with open(symbfile) as f:
-       # a = f.readlines()
-        a = pd.read_csv(symbfile)['Date'].dropna().unique()
+        # a = f.readlines()
+        try:
+            a = pd.read_csv(symbfile)['Date'].dropna().unique()
+        except Exception as e:
+            a = pd.read_csv(symbfile)['TIMESTAMP'].dropna().unique()
         if Options:
             d = a[-1]
         elif len(a) < 2:
