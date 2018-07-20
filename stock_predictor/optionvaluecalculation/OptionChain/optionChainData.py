@@ -156,6 +156,6 @@ def get_OptionFile(cuurent=False):
 
 
 # 18-JUL-2018,NIFTY,26-Jul-2018,10978.6,11000.0,10900.0,32.55462646484375,34.60693359375,35.125732421875,38.543701171875
-import mibian
-CE_H_I = mibian.Me([10986.10, 11000, 7, 0, 8], callPrice=67).impliedVolatility
-print(CE_H_I)
+# import mibian
+# CE_H_I = mibian.Me([10986.10, 11000, 7, 0, 8], callPrice=67).impliedVolatility
+# print(CE_H_I)

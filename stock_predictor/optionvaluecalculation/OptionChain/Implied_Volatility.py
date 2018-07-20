@@ -1,8 +1,8 @@
 import datetime
-
+from utility import getstart
 import pandas as pd
 from nsepy.derivatives import get_expiry_date
-
+import os
 import property as p
 from optionvaluecalculation.OptionChain import optionChainData
 import dask.dataframe as dd
@@ -10,7 +10,7 @@ import mibian
 
 from optionvaluecalculation.OptionChain.optionChainData import get_tradingDay
 
-
+OptionsIV = os.path.join(p.optiondata,'OptionsIV.csv')
 class ImpliedVolatility(object):
     """"""
     def __init__(self,symbol="NIFTY",Dffile='abc.csv',DfFlag=False):
@@ -31,12 +31,14 @@ class ImpliedVolatility(object):
         else:
             optionChainData.appendData()  # get the Latest data.
             currentFile = optionChainData.get_OptionFile(True) # Get current month Option Data File.
+            lastDate = getstart.get_date(OptionsIV,Options=True)
+            print(lastDate)
             Df = pd.read_csv(currentFile)
             return Df
 
-    def getSymbolStrike(self,symbol="NIFTY",Df=pd.DataFrame()):
+    def getSymbolStrike(self,symbol="NIFTY",Df=pd.DataFrame(),x=0):
         def getDateStrike(i):
-            temp_Close = Df_F.loc[Df_F['Date'] == i]['CLOSE'].tolist()[0]
+            temp_Close = Df_F.loc[Df_F['Date'] == i]['CLOSE'].tolist()[x]
             exp_date = Df_F.loc[Df_F['CLOSE'] == temp_Close]['EXPIRY_DT'].tolist()[0]
             temp_OI = DF_O.loc[DF_O['Date'] == i]['STRIKE_PR'].tolist()[-2:]
             diff = abs(temp_OI[0] - temp_OI[1])
@@ -77,8 +79,8 @@ class ImpliedVolatility(object):
             self.striklist.append([i, symbol, exp_date, temp_Close, Strike_High,
             Strike_Low, CE_H_I, CE_L_I, PE_H_I, PE_L_I,days_to_expire])
 
-        mask_F = (Df['SYMBOL'] == symbol) & (Df['INSTRUMENT']  == 'FUTIDX')
-        mask_O = (Df['SYMBOL'] == symbol) & (Df['INSTRUMENT'] == 'OPTIDX')
+        mask_F = (Df['SYMBOL'] == symbol) & (Df['INSTRUMENT'].str.contains('FUT'))
+        mask_O = (Df['SYMBOL'] == symbol) & (Df['INSTRUMENT'].str.contains('OPT'))
         Df_F = Df.loc[mask_F]
         DF_O = Df.loc[mask_O]
 
@@ -90,15 +92,20 @@ class ImpliedVolatility(object):
         # print(header)
         Df = self.load_Data()
         #symbols = Df['SYMBOL']
-        symbolstest=['NIFTY']#,'BANKNIFTY','NIFTYCPSE']
+        symbolstest=['NIFTY',
+                     'BANKNIFTY',
+                     'NIFTYCPSE',
+                     'ARVIND'
+                     ]
         symbols = pd.Series(symbolstest)
-        symbols.apply(self.getSymbolStrike,Df=Df)
+        x_no = [0,1,2]
+        a = list(map(lambda x:symbols.apply(self.getSymbolStrike,Df=Df,x=x),x_no))
         self.striklist = pd.DataFrame(
             self.striklist,
             columns=['Date', 'symbol', 'exp_date', 'temp_Close', 'Strike_High',
                      'Strike_Low', 'CE_H_I', 'CE_L_I', 'PE_H_I', 'PE_L_I', 'days_to_expire'])
         # print(self.striklist)
-        self.striklist.to_csv("strikelist.csv")
+        self.striklist.to_csv("OptionsIV.csv")
 
 
 
