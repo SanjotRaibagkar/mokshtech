@@ -1,25 +1,30 @@
-import requests as req
-from datetime import date, datetime, timedelta
-from calendar import monthrange
-import os
-from utility import getstart as gs, filterframe
-import property as p
+
 try:
+    import requests as req
+    from datetime import date, datetime, timedelta
+    from calendar import monthrange
+    import os
+    from utility import getstart as gs, filterframe
+    import property as p
     import numpy as np
     import pandas as pd
-except:
-        pass
-import nsepy
-from bs4 import BeautifulSoup
-from io import StringIO, BytesIO
+    import zipfile
+    import nsepy
+    from bs4 import BeautifulSoup
+    from io import StringIO, BytesIO
+
+except Exception as e:
+        print(e)
 
 
-PRICE_LIST_URL = 'http://www.nseindia.com/content/historical/DERIVATIVES/%s/%s/fo%sbhav.csv.zip'
+
+PRICE_LIST_URL = 'http://www.nseindia.com/content/historical/EQUITIES/%s/%s/fo%sbhav.csv.zip'
 
 DERIVATIVE_ARCHIVES = 'http://www.nseindia.com/products/dynaContent/common/productsSymbolMapping.jsp?instrumentType=OPTIDX&symbol=NIFTY&expiryDate=27-07-2006&optionType=CE&strikePrice=&dateRange=week&fromDate=&toDate=&segmentLink=9&symbolCount='
 
 def __raw_zip_data_to_str(data):
     fp = BytesIO(data)
+    print(type(fp))
     import zipfile
     zipfile = zipfile.ZipFile(fp)
     name = zipfile.filelist[0].filename
@@ -40,6 +45,7 @@ def get_price_list(dt, proxies={}):
     yy = dt_str[5:9]
     mm = dt_str[2:5].upper()
     url = PRICE_LIST_URL % (yy, mm, dt_str.upper())
+    print(url)
     resp = req.get(url=url, proxies=proxies)
     df = pd.read_csv(StringIO(str(__raw_zip_data_to_str(resp.content), 'utf-8')))
     return df
@@ -103,7 +109,7 @@ def get_year_data(year,Flag=False,Start = date(2018,1,1)):
             prices = filterframe.filtered_frame(prices,Options=True)
             prices.to_csv(fname)
 
-years_series=pd.Series([2016,2017,2018])
+years_series=pd.Series([2015])
 
 
 ### code to append data
@@ -150,9 +156,9 @@ def get_OptionFile(cuurent=False):
             monthFile = os.path.join(p.optiondata, name)
     return monthFile
 
-# if __name__ == '__main__':
-#     # years_series.apply(get_year_data)
-# appendData()
+if __name__ == '__main__':
+    years_series.apply(get_year_data)
+    #appendData()
 
 
 # 18-JUL-2018,NIFTY,26-Jul-2018,10978.6,11000.0,10900.0,32.55462646484375,34.60693359375,35.125732421875,38.543701171875
