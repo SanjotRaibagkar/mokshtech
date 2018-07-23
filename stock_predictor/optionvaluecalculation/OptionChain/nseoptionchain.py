@@ -45,9 +45,12 @@ def get_price_list(dt, proxies={}):
     mm = dt_str[2:5].upper()
     url = PRICE_LIST_URL % (yy, mm, dt_str.upper())
     resp = req.get(url=url, proxies=proxies)
-    df = pd.read_csv(StringIO(str(__raw_zip_data_to_str(resp.content), 'utf-8')))
-    df = df.rename(columns={"TIMESTAMP": "Date"})
-    return df
+    try:
+        df = pd.read_csv(StringIO(str(__raw_zip_data_to_str(resp.content), 'utf-8')))
+        df = df.rename(columns={"TIMESTAMP": "Date"})
+        return df
+    except Exception as e:
+        print("nseoptions error 1 ",e)
 
 def get_tradingDay(start,end):
     return pd.Series(pd.DataFrame(nsepy.get_history(symbol='NIFTY',
