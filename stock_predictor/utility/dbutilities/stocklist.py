@@ -51,6 +51,24 @@ query_Index_data = '''CREATE TABLE IF NOT EXISTS IndexData
         PRIMARY KEY (Date, Symbol));'''
 
 
+query_derivative_alter = '''
+ALTER TABLE derivativeData
+ADD COLUMN Inserttimesamp TIMESTAMP DEFAULT NOW(),
+ADD COLUMN UpdatedTimestamp TIMESTAMP;
+	
+	
+CREATE OR REPLACE FUNCTION update_UpdatedTimestamp_column()
+RETURNS TRIGGER AS $derivativeData$
+BEGIN
+   NEW.UpdatedTimestamp = now(); 
+   RETURN NEW;
+END;
+$derivativeData$ language 'plpgsql';
+
+CREATE TRIGGER update_derivativeData_UpdatedTimestamp BEFORE UPDATE
+    ON derivativeData FOR EACH ROW EXECUTE PROCEDURE 
+    update_UpdatedTimestamp_column();'''
+
 delete_query_index_table= '''DROP TABLE IndexData;'''
 ### create table
 def createstocktable(query,conn=conn):
@@ -62,8 +80,7 @@ def createstocktable(query,conn=conn):
         conn.commit()
         conn.close()
 
-# createstocktable(delete_query_index_table)
-createstocktable(query_Index_data)
+# createstocktable(query_derivative_alter)
 
 query_table_exist= "SELECT id from SymbolList"
 def check_table(conn=conn,query_table_exist=query_table_exist):

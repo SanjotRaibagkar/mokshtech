@@ -23,7 +23,7 @@ class db_queries(object):
     def __init__(self):
         self.database = database
         self.user = user
-        self.password = 'sanjot111'
+        self.password = password
         self.host = host
         self.port = port
 

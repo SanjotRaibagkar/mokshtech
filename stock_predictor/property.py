@@ -33,6 +33,8 @@ basepath=("\\").join(basepathlist)
 dbpath=os.path.join(basepath,'database')
 stockdata=os.path.join(dbpath,'stockdata')
 optiondata = os.path.join(dbpath,'optiondata')
+optiondata_day = os.path.join(dbpath,'optiondata_day')
+
 #stockdata=os.path.join(dbpath,'stockdata_1')
 featurescsv=os.path.join(dbpath,'features.csv')
 featuresdata=os.path.join(dbpath,'featuresdata.csv')

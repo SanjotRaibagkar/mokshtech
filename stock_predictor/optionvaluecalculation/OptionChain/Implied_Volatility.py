@@ -1,16 +1,16 @@
 import datetime
-from utility import getstart
 import pandas as pd
-from nsepy.derivatives import get_expiry_date
 import os
-import property as p
-from optionvaluecalculation.OptionChain import optionChainData
 import dask.dataframe as dd
 import mibian
 
+from utility import getstart
+import property as p
+from optionvaluecalculation.OptionChain import optionChainData
 from optionvaluecalculation.OptionChain.optionChainData import get_tradingDay
+from optionvaluecalculation.optionvalueprop import *
 
-OptionsIV = os.path.join(p.optiondata,'OptionsIV.csv')
+
 class ImpliedVolatility(object):
     """"""
     def __init__(self,symbol="NIFTY",Dffile='abc.csv',DfFlag=False):
@@ -34,32 +34,32 @@ class ImpliedVolatility(object):
             lastDate = getstart.get_date(OptionsIV,Options=True)
             print(lastDate)
             Df = pd.read_csv(currentFile)
-            return Df
+        return Df
 
     def getSymbolStrike(self,symbol="NIFTY",Df=pd.DataFrame(),x=0):
         def getDateStrike(i):
-            temp_Close = Df_F.loc[Df_F['Date'] == i]['CLOSE'].tolist()[x]
-            exp_date = Df_F.loc[Df_F['CLOSE'] == temp_Close]['EXPIRY_DT'].tolist()[0]
-            temp_OI = DF_O.loc[DF_O['Date'] == i]['STRIKE_PR'].tolist()[-2:]
+            temp_Close = Df_F.loc[Df_F[date] == i][close].tolist()[x]
+            exp_date = Df_F.loc[Df_F[close] == temp_Close]['EXPIRY_DT'].tolist()[0]
+            temp_OI = DF_O.loc[DF_O[date] == i]['STRIKE_PR'].tolist()[-2:]
             diff = abs(temp_OI[0] - temp_OI[1])
             Strike_High = temp_Close + (diff - (temp_Close % diff))  # Get smallest no from larger no then Close
             Strike_Low = temp_Close + - (temp_Close % diff)  # Get largest no from smaller then Close
-            Strike_High_mask_CE = (DF_O['Date'] == i)\
+            Strike_High_mask_CE = (DF_O[date] == i)\
                                   & (DF_O['STRIKE_PR'] == Strike_High)\
                                   & (DF_O['EXPIRY_DT'] == exp_date)\
                                   & (DF_O['OPTION_TYP'] == 'CE')
 
-            Strike_High_mask_PE = (DF_O['Date'] == i) \
+            Strike_High_mask_PE = (DF_O[date] == i) \
                                   & (DF_O['STRIKE_PR'] == Strike_High) \
                                   & (DF_O['EXPIRY_DT'] == exp_date) \
                                   & (DF_O['OPTION_TYP'] == 'PE')
 
-            Strike_Low_mask_CE = (DF_O['Date'] == i) \
+            Strike_Low_mask_CE = (DF_O[date] == i) \
                                   & (DF_O['STRIKE_PR'] == Strike_Low) \
                                   & (DF_O['EXPIRY_DT'] == exp_date) \
                                   & (DF_O['OPTION_TYP'] == 'CE')
 
-            Strike_Low_mask_PE = (DF_O['Date'] == i) \
+            Strike_Low_mask_PE = (DF_O[date] == i) \
                                   & (DF_O['STRIKE_PR'] == Strike_Low) \
                                   & (DF_O['EXPIRY_DT'] == exp_date) \
                                   & (DF_O['OPTION_TYP'] == 'PE')
@@ -85,27 +85,35 @@ class ImpliedVolatility(object):
         DF_O = Df.loc[mask_O]
 
         Dates_F = pd.Series(Df.loc[mask_F]['Date'].unique())
-        Dates_F.apply(getDateStrike)
+        try:
+            Dates_F.apply(getDateStrike)
+        except Exception as e:
+            print("error Implied_Volatility1 ", e)
 
     def getStrike(self):
         header = str("")
-        # print(header)
         Df = self.load_Data()
-        #symbols = Df['SYMBOL']
-        symbolstest=['NIFTY',
-                     'BANKNIFTY',
-                     'NIFTYCPSE',
-                     'ARVIND'
-                     ]
-        symbols = pd.Series(symbolstest)
+        symbols = Df['SYMBOL']
+        # symbolstest=['NIFTY',
+        #              'BANKNIFTY',
+        #              'NIFTYCPSE',
+        #              'ARVIND'
+        #              ]
+        # symbols = pd.Series(symbolstest)
         x_no = [0,1,2]
-        a = list(map(lambda x:symbols.apply(self.getSymbolStrike,Df=Df,x=x),x_no))
+
+        try:
+            a = list(map(lambda x:symbols.apply(self.getSymbolStrike,Df=Df,x=x),x_no))
+        except Exception as e:
+            print("error Implied_Volatility2 ",e)
         self.striklist = pd.DataFrame(
             self.striklist,
             columns=['Date', 'symbol', 'exp_date', 'temp_Close', 'Strike_High',
                      'Strike_Low', 'CE_H_I', 'CE_L_I', 'PE_H_I', 'PE_L_I', 'days_to_expire'])
-        # print(self.striklist)
-        self.striklist.to_csv("OptionsIV.csv")
+        if os.path.isfile(OptionsIV):
+            self.striklist.to_csv(OptionsIV,mode='a',header=False)
+        else:
+            self.striklist.to_csv(OptionsIV,header=True)
 
 
 
@@ -114,5 +122,5 @@ class ImpliedVolatility(object):
 
 
 
-implobj = ImpliedVolatility()
-implobj.getStrike()
+# implobj = ImpliedVolatility()
+# implobj.getStrike()

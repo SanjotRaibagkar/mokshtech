@@ -2,9 +2,12 @@ import requests as req
 from datetime import date, datetime
 from calendar import monthrange
 import os
+
+from optionvaluecalculation.OptionChain.Implied_Volatility import ImpliedVolatility
 from utility import getstart as gs, filterframe
 import property as p
 from utility.dbutilities import appendDB, uploadStockData
+
 try:
     import numpy as np
     import pandas as pd
@@ -75,28 +78,37 @@ def get_year_data(year,Flag=False,Start = date(2018,1,1)):
         elif (year == now.year and i <= now.month):
             end = date(year, i, monthrange(year, i)[1])
         tradingDay=get_tradingDay(start,end)
-        fname=str("prices_")+str(year)+"_"+str(i)+".csv"
-        fname = os.path.join(p.optiondata,fname)
+        filename=str("prices_")+str(year)+"_"+str(i)+".csv"
+        fname = os.path.join(p.optiondata,filename)
+        fname_day = os.path.join(p.optiondata_day,filename)
         price=[]
         if Flag and os.path.isfile(fname):
             old_prices = pd.read_csv(fname)
             old_prices.rename(columns={"TIMESTAMP": "Date"})
             price.append(old_prices)
         def concat_Data(x):
-            price.append(get_price_list(dt=x))
+            price_df = get_price_list(dt=x)
+            price_df.to_csv(fname_day)
+            price.append(price_df)
+            implobj = ImpliedVolatility(Dffile=fname_day,DfFlag=True)
+            implobj.getStrike()
         tradingDay.apply(concat_Data)
         if len(price) > 0:
             prices = pd.concat(price)
-        prices = filterframe.filtered_frame(prices,Options=True)
-        prices.to_csv(fname)
+            prices = filterframe.filtered_frame(prices,Options=True)
+            prices.to_csv(fname)
+            #uploadStockData.upload_OptionsData()
+        else:
+            print("no data to recieve")
 
 
 
-years_series=pd.Series([2018])
+
+years_series=pd.Series([2016])
 
 
-# if __name__ == '__main__':
-#     years_series.apply(get_year_data)
+if __name__ == '__main__':
+    years_series.apply(get_year_data)
 # # prices.to_csv("test.csv")
 
 
@@ -104,10 +116,11 @@ years_series=pd.Series([2018])
 
 def appendData():
     now = datetime.now()
-    for d,s,files in os.walk(p.optiondata):
+    for d,s,files in os.walk(p.optiondata_day):
         for f in files:
-            fnme = os.path.join(p.optiondata,f)
-            os.remove(fnme)
+            fnme = os.path.join(p.optiondata_day,f)
+            if fnme.startswith("prices_"):
+                os.remove(fnme)
     # name = str("prices_") + str(now.year) + "_" + str(now.month) + ".csv"
     # monthFile=os.path.join(p.optiondata,name)
     # filefound = 0
@@ -140,4 +153,4 @@ def appendData():
     # else:
     #     get_year_data(now.year,)
 
-appendData()
+# appendData()

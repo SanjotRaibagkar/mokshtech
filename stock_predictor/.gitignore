@@ -71,3 +71,6 @@ venv/*/*
 
 #Workspace
 .idea/workspace.xml
+
+# DBproperties
+./*/*/dbproperties.py

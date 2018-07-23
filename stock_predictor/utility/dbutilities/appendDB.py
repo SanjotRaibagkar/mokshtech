@@ -11,10 +11,6 @@ import pandas as pd
 
 
 
-dbobj = dbq.db_queries()
-conn = dbobj.create_connection()
-cur = conn.cursor()
-
 latest_derivative_query = "SELECT max(to_date(Date, 'DD Mon YYYY'))  from derivativeData;"
 
 
@@ -38,8 +34,12 @@ def get_prev_day(query,conn):
 
 datetime.strptime("2013-1-25", '%Y-%m-%d').strftime('%d-%b-%Y')
 
+if __name__ == '__main__':
+    dbobj = dbq.db_queries()
+    conn = dbobj.create_connection()
+    cur = conn.cursor()
 
-latestday_der = get_latest_dates(latest_derivative_query,conn,p.optiondata)
+    latestday_der = get_latest_dates(latest_derivative_query,conn,p.optiondata)
 
 # prev_day = latestday.days - timedelta(days=1)
 # print(latestday,prev_day)
