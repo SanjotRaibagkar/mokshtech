@@ -4,6 +4,7 @@ from calendar import monthrange
 import os
 from utility import getstart as gs, filterframe
 import property as p
+from utility.dbutilities import appendDB, uploadStockData
 try:
     import numpy as np
     import pandas as pd
@@ -65,7 +66,8 @@ def get_year_data(year,Flag=False,Start = date(2018,1,1)):
         m = range(1,13)
     for i in m:
         if Flag:
-            start = date(Start[0],Start[2],Start[1])
+            start = str(Start)
+            start = date(int(start[0:4]),int(start[5:7]),int(start[8:10]))
         else:
             start = date(year, i, 1)
         if year < now.year:
@@ -81,13 +83,14 @@ def get_year_data(year,Flag=False,Start = date(2018,1,1)):
             old_prices.rename(columns={"TIMESTAMP": "Date"})
             price.append(old_prices)
         def concat_Data(x):
-            print(x)
             price.append(get_price_list(dt=x))
         tradingDay.apply(concat_Data)
-        prices = pd.concat(price)
-        print(prices.tail(1))
+        if len(price) > 0:
+            prices = pd.concat(price)
         prices = filterframe.filtered_frame(prices,Options=True)
         prices.to_csv(fname)
+
+
 
 years_series=pd.Series([2018])
 
@@ -101,31 +104,40 @@ years_series=pd.Series([2018])
 
 def appendData():
     now = datetime.now()
-    name = str("prices_") + str(now.year) + "_" + str(now.month) + ".csv"
-    monthFile=os.path.join(p.optiondata,name)
-    filefound = 0
-    while(filefound == 0):
-        if os.path.isfile(monthFile):
-            filefound = 1
-        else:
-            name = str("prices_") + str(now.year) + "_" + str(now.month-1) + ".csv"
-            monthFile = os.path.join(p.optiondata, name)
-            print(monthFile)
+    for d,s,files in os.walk(p.optiondata):
+        for f in files:
+            fnme = os.path.join(p.optiondata,f)
+            os.remove(fnme)
+    # name = str("prices_") + str(now.year) + "_" + str(now.month) + ".csv"
+    # monthFile=os.path.join(p.optiondata,name)
+    # filefound = 0
+    # while(filefound == 0):
+    #     if os.path.isfile(monthFile):
+    #         filefound = 1
+    #     else:
+    #         name = str("prices_") + str(now.year) + "_" + str(now.month-1) + ".csv"
+    #         monthFile = os.path.join(p.optiondata, name)
+    #         print(monthFile)
+    #
+    # if filefound:
+    #     startdate=datetime.strptime(gs.get_startdate(monthFile,Options=True),"%d-%b-%y") # date from where we need to download
+    #     datediff = ((date.today()-startdate.date()).seconds)//60
+    #     if datediff == 0: # for days the above statement will give zero so calculate once more
+    #         datediff = ((date.today()-startdate.date()).days)*24*60*60
+    #     if datediff == 0:
+    #         print('updated data present')
+    #     elif 1 < datediff < 1440 :
+    #         pass                # Place holder for 5 mins and 1 min data download code.
+    #     else:
+    #         print('downloading delta data')
+    #         startdate = (startdate.year,startdate.day,startdate.month)
+    latestdate = appendDB.latestday_der
+    latestdate=datetime.strptime(latestdate,"%d-%b-%Y") # date from where we need to download
 
-    if filefound:
-        startdate=datetime.strptime(gs.get_startdate(monthFile,Options=True),"%d-%b-%y") # date from where we need to download
-        datediff = ((date.today()-startdate.date()).seconds)//60
-        if datediff == 0: # for days the above statement will give zero so calculate once more
-            datediff = ((date.today()-startdate.date()).days)*24*60*60
-        if datediff == 0:
-            print('updated data present')
-        elif 1 < datediff < 1440 :
-            pass                # Place holder for 5 mins and 1 min data download code.
-        else:
-            print('downloading delta data')
-            startdate = (startdate.year,startdate.day,startdate.month)
-            get_year_data(now.year,True,startdate)
-    else:
-        get_year_data(now.year,)
+    print(latestdate)
+
+    get_year_data(now.year,True,latestdate)
+    # else:
+    #     get_year_data(now.year,)
 
 appendData()
