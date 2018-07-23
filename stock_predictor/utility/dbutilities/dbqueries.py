@@ -21,18 +21,18 @@ nse = Nse()
 
 class db_queries(object):
     def __init__(self):
-        self.database = "mokshtechdatabase"
-        self.user = "postgres"
-        self.password = "sanjot111"
-        self.host = "35.237.66.79"
-        self.port = "5432"
+        self.database = database
+        self.user = user
+        self.password = 'sanjot111'
+        self.host = host
+        self.port = port
 
     def create_connection(self):
-        conn = psycopg2.connect(database="mokshtechdatabase",
-                                user="postgres",
-                                password="sanjot111",
-                                host="35.237.66.79",
-                                port="5432")
+        conn = psycopg2.connect(database=self.database,
+                                user=self.user,
+                                password=self.password,
+                                host=self.host,
+                                port=self.port)
         print("Opened database successfully")
         return conn
 
@@ -42,13 +42,15 @@ class db_queries(object):
     def exe(self,conn,query):
         cur = conn.cursor()
         cur.execute(query)
+        return cur
+
         # rows = cur.fetchall()
 
 
     def df2db(self, df, table):
         engineurl = 'postgresql://'+self.user+':'+self.password+'@'+self.host+':'+self.port+'/'+self.database
         from sqlalchemy import create_engine
-        engine = create_engine('postgresql://scott:tiger@localhost:5432/mydatabase')
+        engine = create_engine(engineurl)
         df.to_sql(table, engine)
         # conn.commit()
 
