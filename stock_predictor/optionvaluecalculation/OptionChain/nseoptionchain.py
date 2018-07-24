@@ -69,7 +69,8 @@ def get_year_data(year,Flag=False,Start = date(2018,1,1)):
     if Flag :
         m = range(now.month,now.month+1)
     else:
-        m = range(1,13)
+        m = range(2
+                  ,13)
     for i in m:
         if Flag:
             start = str(Start)
