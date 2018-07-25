@@ -53,10 +53,14 @@ def get_price_list(dt, proxies={}):
         print("nseoptions error 1 ",e)
 
 def get_tradingDay(start,end):
-    return pd.Series(pd.DataFrame(nsepy.get_history(symbol='NIFTY',
-                start=start,
-                end=end,
-                index=True)).index)
+    if end < start :
+        print('start {0} is greater than end {1}'.format(start,end))
+        pass
+    else:
+        return pd.Series(pd.DataFrame(nsepy.get_history(symbol='NIFTY',
+                    start=start,
+                    end=end,
+                    index=True)).index)
 
 def get_year_data(year,Flag=False,Start = date(2018,1,1)):
     """
@@ -69,8 +73,7 @@ def get_year_data(year,Flag=False,Start = date(2018,1,1)):
     if Flag :
         m = range(now.month,now.month+1)
     else:
-        m = range(2
-                  ,13)
+        m = range(1,13)
     for i in m:
         if Flag:
             start = str(Start)
@@ -81,7 +84,13 @@ def get_year_data(year,Flag=False,Start = date(2018,1,1)):
             end = date(year, i, monthrange(year, i)[1])
         elif (year == now.year and i <= now.month):
             end = date(year, i, monthrange(year, i)[1])
-        tradingDay=get_tradingDay(start,end)
+        else:
+            break
+        print(start,end)
+        try:
+            tradingDay=get_tradingDay(start,end)
+        except Exception as e:
+            print("nseoptions error 2 ", e)
         filename=str("prices_")+str(year)+"_"+str(i)+".csv"
         fname = os.path.join(p.optiondata,filename)
         fname_day = os.path.join(p.optiondata_day,filename)
@@ -91,6 +100,7 @@ def get_year_data(year,Flag=False,Start = date(2018,1,1)):
             old_prices.rename(columns={"TIMESTAMP": "Date"})
             price.append(old_prices)
         def concat_Data(x):
+            print(x)
             price_df = get_price_list(dt=x)
             price_df.to_csv(fname_day)
             price.append(price_df)
@@ -108,7 +118,7 @@ def get_year_data(year,Flag=False,Start = date(2018,1,1)):
 
 
 
-years_series=pd.Series([2016])
+years_series=pd.Series([2018])
 
 
 if __name__ == '__main__':
