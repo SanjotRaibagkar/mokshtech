@@ -116,16 +116,6 @@ def get_year_data(year,Flag=False,Start = date(2018,1,1)):
             print("no data to recieve")
 
 
-
-
-years_series=pd.Series([2018])
-
-
-if __name__ == '__main__':
-    years_series.apply(get_year_data)
-# # prices.to_csv("test.csv")
-
-
 ### code to append data
 
 def appendData():
@@ -158,13 +148,15 @@ def appendData():
     #     else:
     #         print('downloading delta data')
     #         startdate = (startdate.year,startdate.day,startdate.month)
-    latestdate = appendDB.latestday_der
-    latestdate=datetime.strptime(latestdate,"%d-%b-%Y") # date from where we need to download
+    latestdate = appendDB.get_latest('latestday_der')
+    if latestdate !=0 :latestdate=datetime.strptime(latestdate,"%d-%b-%Y") # date from where we need to download
 
     print(latestdate)
 
     get_year_data(now.year,True,latestdate)
-    # else:
-    #     get_year_data(now.year,)
 
-# appendData()
+
+years_series=pd.Series([2018])
+if __name__ == '__main__':
+    years_series.apply(get_year_data)
+    # appendData()

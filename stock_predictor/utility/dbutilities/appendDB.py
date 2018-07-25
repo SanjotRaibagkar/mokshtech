@@ -13,9 +13,20 @@ import pandas as pd
 
 latest_derivative_query = "SELECT max(to_date(Date, 'DD Mon YYYY'))  from derivativeData;"
 
+min_max_symbol_date_query = "SELECT min(to_date(maxSymbolDate, 'DD Mon YYYY')) from " \
+                            "(SELECT max(to_date(Date, 'DD Mon YYYY'))" \
+                            "  from StockData where SYMBOL in " \
+                            "(SELECT Distinct SYMBOL  from StockData) as maxSymbolDate)"
 
-def get_latest_dates(query,conn,path):
-    if path == p.optiondata:
+
+try:
+    dbobj = dbq.db_queries()
+    conn = dbobj.create_connection()
+    cur = conn.cursor()
+except Exception as e:
+    print("DB not connected")
+
+def get_latest_dates(query,conn):
         try:
             cur = dbobj.exe(conn, query)
             rows = cur.fetchall()[0][0]
@@ -23,6 +34,25 @@ def get_latest_dates(query,conn,path):
             return latestday
         except Exception as e:
             print('Error',e)
+
+
+def get_latest(x):
+    if x == 'latestday_der':
+        try:
+            return get_latest_dates(latest_derivative_query, conn)
+        except Exception as e:
+            print("DB not connected")
+    elif x == 'latestday_stock':
+        try:
+            return get_latest_dates(min_max_symbol_date_query, conn)
+        except Exception as e:
+            print("DB not connected")
+    else:
+        return '2018-12-7'#'2015-01-01'
+
+
+
+
 
 def get_prev_day(query,conn):
     try:
@@ -35,15 +65,6 @@ def get_prev_day(query,conn):
 datetime.strptime("2013-1-25", '%Y-%m-%d').strftime('%d-%b-%Y')
 
 if __name__ == '__main__':
-    dbobj = dbq.db_queries()
-    conn = dbobj.create_connection()
-    cur = conn.cursor()
+    pass
+    print(get_latest('latestday_stock'))
 
-    latestday_der = get_latest_dates(latest_derivative_query,conn,p.optiondata)
-
-# prev_day = latestday.days - timedelta(days=1)
-# print(latestday,prev_day)
-# count_query = '''SELECT count(*)  from derivativeData where Date = {0};'''.format(str(latestday))
-#
-# count_pk = get_prev_day(count_query,conn)
-#print(count_pk)

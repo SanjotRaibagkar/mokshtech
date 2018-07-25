@@ -48,7 +48,7 @@ def get_startdate(symbfile,symbol='NIFTY',flag=True, Options=False):
         d=get_date(symbfile,Options)
         return(d)
     else:
-        fd.format_data()
+        fd.format_data()  # if the files extension are not csv convert them to csv
         if os.path.isfile(symbfile):
             d = get_date(symbfile,Options)
             return (d)

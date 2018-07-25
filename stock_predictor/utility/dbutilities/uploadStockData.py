@@ -25,21 +25,26 @@ def uploadData(x,table):
         conn.commit()
 
 
-
-for a,b,c in os.walk(p.stockdata):
-    print(c)
-c=['FTSE100','INDIAVIX','NIFTYCPSE','NIFTY','NIFTYIT','BANKNIFTY','NIFTYMID50','NIFTYPSE','NIFTYINFRA']
-
-filelist=[]
-for files in c:
-    files=files+'.csv'
-    filelist.append(os.path.join(p.stockdata,files))
+stocklist=[]
+indlist = []
+for a,b,c in os.walk(p.stockdatadelta):
+    indlist=['FTSE100','INDIAVIX','NIFTYCPSE','NIFTY','NIFTYIT','BANKNIFTY','NIFTYMID50','NIFTYPSE','NIFTYINFRA']
+    c = list(set(c)-set(indlist))
+    for files in c:
+        #files=files+'.csv'
+        if not files.startswith("symbolList.csv"):
+            stocklist.append(os.path.join(p.stockdatadelta,files))
+    for files in indlist:
+        if not files.startswith("symbolList.csv"):
+            indlist.append(os.path.join(p.stockdatadelta,files))
+stocklist = pd.Series(stocklist)
+indlist = pd.Series(indlist)
 
 optionsList=[]
-for d, s, files in os.walk(p.optiondata):
+for d, s, files in os.walk(p.optiondata_day):
     for f in files:
         if f.startswith("prices"):
-            optionsList.append(os.path.join(p.optiondata, f))
+            optionsList.append(os.path.join(p.optiondata_day, f))
 
 optionsList=pd.Series(optionsList)
 
@@ -48,6 +53,9 @@ optionsList=pd.Series(optionsList)
 
 def upload_OptionsData():
     optionsList.apply(uploadData,args=('derivativeData',))
+def upload_StockData():
+    stocklist.apply(uploadData,args=('StockData',))
+    indlist.apply(uploadData)
 
 
 if __name__ == '__main__':

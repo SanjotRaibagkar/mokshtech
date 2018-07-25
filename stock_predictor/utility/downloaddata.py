@@ -24,6 +24,9 @@ def down_data(symbfile,symbol='NIFTY',flag=True,startdate=startdate,enddate=date
             dataset_train=dataset_train.drop_duplicates()
             dataset_train = dataset_train.dropna(how='all')
             dataset_train.to_csv(symbfile , mode='a', header=headerflag)
+            delsymfile = symbol + '.csv'
+            delsymfilepath = os.path.join(stockdatadelta,delsymfile)
+            dataset_train.to_csv(symbfile , mode='a', header=True)
 
             print(symbol,' done')
         else:

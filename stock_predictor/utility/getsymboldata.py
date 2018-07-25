@@ -32,6 +32,11 @@ def getsymboldata(flag,symbol):
 
 
 def run_getsymboldata():
+    for d,s,files in os.walk(stockdatadelta):
+        for f in files:
+            fnme = os.path.join(stockdatadelta,f)
+            if not fnme.startswith("symbolList.csv"):
+                os.remove(fnme)
     try:
         ind = lambda lst: getsymboldata(True, lst)
         list(map(ind, indlist))
