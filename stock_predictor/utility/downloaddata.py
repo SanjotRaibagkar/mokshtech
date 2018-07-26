@@ -9,6 +9,7 @@ from utility import getstart as gs
 startdate=date(p.y,p.m,p.d)
 def down_data(symbfile,symbol='NIFTY',flag=True,startdate=startdate,enddate=date.today(),headerflag=False):
     try:
+        print(startdate)
         print(symbol,' downloading...')
         dataset_train  = pd.DataFrame(nsepy.get_history(symbol=symbol,
                             start=startdate,
@@ -23,14 +24,17 @@ def down_data(symbfile,symbol='NIFTY',flag=True,startdate=startdate,enddate=date
             dataset_train.index = pd.to_datetime(dataset_train.index)
             dataset_train=dataset_train.drop_duplicates()
             dataset_train = dataset_train.dropna(how='all')
-            dataset_train.to_csv(symbfile , mode='a', header=headerflag)
             delsymfile = symbol + '.csv'
             delsymfilepath = os.path.join(stockdatadelta,delsymfile)
-            dataset_train.to_csv(symbfile , mode='a', header=True)
-
+            print(delsymfilepath)
+            if os.path.exists(delsymfilepath):
+                dataset_train.to_csv(delsymfilepath , mode='a', header=True)
+            else:
+                dataset_train.to_csv(delsymfilepath , mode='a', header=False)
+            dataset_train.to_csv(symbfile , mode='a', header=headerflag)
             print(symbol,' done')
         else:
-            print(symbol,' not sufficient data')
+            print(symbol,startdate,' not sufficient data')
     except Exception as e:
         print('Error',symbol,e)
 

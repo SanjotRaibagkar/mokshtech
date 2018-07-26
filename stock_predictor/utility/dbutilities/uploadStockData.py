@@ -63,4 +63,4 @@ if __name__ == '__main__':
     dbobj = dbq.db_queries()
     conn = dbobj.create_connection()
     cur = conn.cursor()
-    upload_OptionsData()
+    upload_StockData()
