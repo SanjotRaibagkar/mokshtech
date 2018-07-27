@@ -67,22 +67,15 @@ def get_optionDataFromChain(optionChain2, startDate, endDate, symbol, year, mont
     result = pd.concat(l)
     return call_data_list, put_data_list, result
 
-
 def maxpain(c):
     for _, row in c.iterrows():
-        # strike_price = 8900.0
         strike_price = row.name
         d = c.index.get_loc(strike_price)
-
-        val1 = ((strike_price - c.index[:d].values) * c.iloc[:d]['OPEN_INT']['CE']).sum()
-        val2 = ((c.index[d:].values - strike_price) * c.iloc[d:]['OPEN_INT']['PE']).sum()
+        val1 = ((strike_price - c.index[:d].values) * c.iloc[:d]['CE']).sum()
+        val2 = ((c.index[d:].values - strike_price) * c.iloc[d:]['PE']).sum()
         # print("calc",strike_price,'--',val2)
         c.set_value(strike_price, 'callsum', val1)
         c.set_value(strike_price, 'putsum', val2)
-
-    #        v1 = c.iloc[:d]['Open Interest']['CE'].sum()
-    #        v2= c.iloc[:d]['Open Interest']['PE'].sum()
-
     return c
 
 
@@ -91,21 +84,14 @@ date1 = end + timedelta(days=-1)
 
 
 def findmaxpain(symbol,df):
-    print(symbol)
-    #calldatalist, putdatalist, calldataframe = df
-    #     #get_optionDataFromChain(optionseries, start, end, symbol, 2018, 5, True,weekly=False)
-    # # calldataframe.to_csv("merge.csv")
-    # print(date1)
-    # a = calldataframe.groupby(calldataframe.index)
     b = df[['STRIKE_PR', 'OPTION_TYP', 'OPEN_INT']]
-    c = b.groupby(['STRIKE_PR', 'OOPTION_TYP'])[['OPEN_INT']].sum().unstack()
+    c = b.groupby(['STRIKE_PR', 'OPTION_TYP'])['OPEN_INT'].sum().unstack()
     c['callsum'] = 0
     c['putsum'] = 0
     r1 = maxpain(c)
     r1["totalpain"] = c['callsum'] + c['putsum']
-
-    # print(r1.loc[r1["totalpain"].idxmin()])
-    return r1.loc[r1["totalpain"].idxmin()], r1
+    mp_strike_pr = r1["totalpain"].idxmin()
+    return mp_strike_pr,r1.loc[r1["totalpain"].idxmin()], r1
 
 
 maximum = "MAX"

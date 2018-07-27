@@ -27,23 +27,50 @@ symbol_query = '''CREATE TABLE IF NOT EXISTS SymbolList
       INDFLAG        INT,
       FO_FLAG        INT);'''
 
-stock_data_query = '''CREATE TABLE IF NOT EXISTS StockData
-        (Date   VARCHAR(12) NOT NULL,
-        Symbol  VARCHAR(50) NOT NULL,
-        Series  CHAR(2),
-        Prev_Close  REAL,
-        Open    REAL,
-        High    REAL,
-        Low     REAL,
-        Last    REAL,
-        Close   REAL,
-        VWAP    REAL,
-        Volume  BIGINT,
-        Turnover    numeric,
-        Trades  numeric,
-        Deliverable_Volume  numeric,
-        Deliverble     numeric,
-        PRIMARY KEY (Date, Symbol));'''
+stock_data_query = '''CREATE TABLE StockData (
+    Date               DATETIME     NOT NULL,
+    Symbol             VARCHAR (50) NOT NULL,
+    Series             CHAR (2),
+    Prev_Close         REAL,
+    Open               REAL,
+    High               REAL,
+    Low                REAL,
+    Last               REAL,
+    Close              REAL,
+    VWAP               REAL,
+    Volume             BIGINT,
+    Turnover           NUMERIC,
+    Trades             NUMERIC,
+    Deliverable_Volume NUMERIC,
+    Deliverble         NUMERIC,
+    Inserttimestamp    DATETIME     DEFAULT (CURRENT_TIMESTAMP) 
+                                    NOT NULL ON CONFLICT ROLLBACK,
+    Updatetimestamp    DATETIME     DEFAULT (CURRENT_TIMESTAMP),
+    PRIMARY KEY (
+        Date,
+        Symbol
+    )
+);
+
+CREATE TRIGGER UpdateTimestamp
+         AFTER UPDATE
+            ON StockData
+      FOR EACH ROW
+BEGIN
+    INSERT INTO StockData (
+                              UpdatedTimestamp
+                          )
+                          VALUES (
+                              datetime('now') 
+                          );
+END;
+'''
+
+def listtriggers(triger,table):
+    return 'SELECT name FROM sqlite_master WHERE ' \
+           'type = {0} AND tbl_name = {1};.' \
+           'format(triger,table)'
+
 
 query_delete_stock = "DROP TABLE StockData;"
 query_Index_data = '''CREATE TABLE IF NOT EXISTS IndexData

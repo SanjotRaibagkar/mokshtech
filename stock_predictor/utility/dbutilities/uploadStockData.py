@@ -31,13 +31,20 @@ for a,b,c in os.walk(p.stockdatadelta):
     indlist=['FTSE100','INDIAVIX','NIFTYCPSE','NIFTY','NIFTYIT','BANKNIFTY','NIFTYMID50','NIFTYPSE','NIFTYINFRA']
     c = list(set(c)-set(indlist))
     for files in c:
+        print(c)
+        exit(1)
         #files=files+'.csv'
         if not files.startswith("symbolList.csv"):
             stocklist.append(os.path.join(p.stockdatadelta,files))
+            print(stocklist)
+            exit(1)
     for files in indlist:
         if not files.startswith("symbolList.csv"):
             indlist.append(os.path.join(p.stockdatadelta,files))
+
+
 stocklist = pd.Series(stocklist)
+
 indlist = pd.Series(indlist)
 
 optionsList=[]

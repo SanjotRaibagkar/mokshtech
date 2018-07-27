@@ -1,11 +1,13 @@
+import os
+import property as p
 database = "mokshtechdatabase"
 user = "postgres"
-password = "sanjot111"
+password = "xxxxxxx"
 # host = "117.228.34.133"
 port = "5432"
-host="35.237.66.79"
+host="xxxxxxxx"
 
-
+sqlmokshtechdb = os.path.join(p.sqldb,'mokshtechdatabase.db')
 
 
 # Server [localhost]:
