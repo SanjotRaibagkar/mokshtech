@@ -6,7 +6,7 @@ import os
 from optionvaluecalculation.OptionChain.Implied_Volatility import ImpliedVolatility
 from utility import getstart as gs, filterframe
 import property as p
-from utility.dbutilities import appendDB, uploadStockData
+from utility.dbutilities import appendDB
 
 try:
     import numpy as np
@@ -156,7 +156,7 @@ def appendData():
     get_year_data(now.year,True,latestdate)
 
 
-years_series=pd.Series([2018])
+years_series=pd.Series([2017,2018])
 if __name__ == '__main__':
     years_series.apply(get_year_data)
     # appendData()

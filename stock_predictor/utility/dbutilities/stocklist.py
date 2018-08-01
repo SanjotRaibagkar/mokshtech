@@ -39,6 +39,7 @@ stock_data_query = '''CREATE TABLE StockData (
     Close              REAL,
     VWAP               REAL,
     Volume             BIGINT,
+    
     Turnover           NUMERIC,
     Trades             NUMERIC,
     Deliverable_Volume NUMERIC,

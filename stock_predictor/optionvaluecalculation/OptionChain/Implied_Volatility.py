@@ -9,7 +9,7 @@ from optionvaluecalculation.OptionChain import optionChainData
 from optionvaluecalculation.OptionChain.optionChainData import get_tradingDay
 from optionvaluecalculation.optionvalueprop import *
 from optionvaluecalculation.OptionChain import OIMAXPAIN
-
+from utility.dbutilities.dbqueries import *
 class ImpliedVolatility(object):
     """"""
     def __init__(self,symbol="NIFTY",Dffile='abc.csv',DfFlag=False):
@@ -32,6 +32,7 @@ class ImpliedVolatility(object):
             currentFile = optionChainData.get_OptionFile(True) # Get current month Option Data File.
             lastDate = getstart.get_date(currentFile,Options=True)
             print(lastDate)
+            currentFile = os.path.join(p.optiondata,"prices_2016.csv")
             Df = pd.read_csv(currentFile)
         return Df
 
@@ -40,18 +41,24 @@ class ImpliedVolatility(object):
             list,
             columns=['Date', 'symbol', 'exp_date', 'temp_Close', 'Strike_High',
                      'Strike_Low', 'CE_H_I', 'CE_L_I', 'PE_H_I', 'PE_L_I', 'days_to_expire',
-                     'ce_maxpain', 'pe_maxpain', 'maxpain', 'mp_strike_pr', 'CE_OI_Max2_St_Pr',
-                     'CE_OI_Max2_CHG_OI',
+                     'ce_maxpain', 'pe_maxpain', 'maxpain', 'mp_strike_pr',
+                     'CE_OI_Max2_St_Pr', 'CE_OI_Max2_CHG_OI',
                      'CE_OI_Max1_St_Pr', 'CE_OI_Max1_CHG_OI',
-                     'PE_OI_Max2_St_Pr', 'CE_OI_Max2_CHG_OI',
-                     'PE_OI_Max2_St_Pr', 'CE_OI_Max2_CHG_OI'
+                     'PE_OI_Max2_St_Pr', 'PE_OI_Max2_CHG_OI',
+                     'PE_OI_Max1_St_Pr', 'PE_OI_Max1_CHG_OI'
                      ])
         if os.path.isfile(OptionsIV):
             self.striklist_DF.to_csv(OptionsIV, mode='a', header=False)
         else:
             self.striklist_DF.to_csv(OptionsIV, header=True)
+        try:
+            dbq = db_queries()
+            dbq.df_sql(self.striklist_DF,'MaxpainIV')
+        except Exception as e:
+            print("IMP V 4 ",e)
 
     def getSymbolStrike(self,symbol="NIFTY",Df=pd.DataFrame(),x=0):
+        print(symbol)
         def getDateStrike(i):
             strlist = []
             temp_Close = Df_F.loc[Df_F[date] == i][close].tolist()[x]
@@ -106,11 +113,10 @@ class ImpliedVolatility(object):
             # DF_test.to_csv('DFtest.csv')
             CE_OI_Max2_St_Pr,CE_OI_Max2_CHG_OI = DF_test.loc[DF_test['OPEN_INT'] == CE_OI_Max2][['STRIKE_PR','CHG_IN_OI']].values[0][-2:]
             CE_OI_Max1_St_Pr,CE_OI_Max1_CHG_OI = DF_test.loc[DF_test['OPEN_INT'] == CE_OI_Max1][['STRIKE_PR','CHG_IN_OI']].values[0][-2:]
-            PE_OI_Max2_St_Pr,CE_OI_Max2_CHG_OI = DF_test.loc[DF_test['OPEN_INT'] == PE_OI_Max2][['STRIKE_PR','CHG_IN_OI']].values[0][-2:]
-            PE_OI_Max1_St_Pr,CE_OI_Max1_CHG_OI = DF_test.loc[DF_test['OPEN_INT'] == PE_OI_Max1][['STRIKE_PR','CHG_IN_OI']].values[0][-2:]
+            PE_OI_Max2_St_Pr,PE_OI_Max2_CHG_OI = DF_test.loc[DF_test['OPEN_INT'] == PE_OI_Max2][['STRIKE_PR','CHG_IN_OI']].values[0][-2:]
+            PE_OI_Max1_St_Pr,PE_OI_Max1_CHG_OI = DF_test.loc[DF_test['OPEN_INT'] == PE_OI_Max1][['STRIKE_PR','CHG_IN_OI']].values[0][-2:]
 
-            print(ce_maxpain, pe_maxpain, maxpain,mp_strike_pr,CE_OI_Max2_St_Pr,CE_OI_Max2_CHG_OI,CE_OI_Max1_St_Pr,CE_OI_Max1_CHG_OI,
-                  PE_OI_Max2_St_Pr, CE_OI_Max2_CHG_OI,PE_OI_Max2_St_Pr,CE_OI_Max2_CHG_OI)
+            #
 
             # OI_CE_High = DF_O.loc[Strike_High_mask_CE][close].tolist()[0]
             # OI_CE_Low = DF_O.loc[Strike_Low_mask_CE][close].tolist()[0]
@@ -125,11 +131,11 @@ class ImpliedVolatility(object):
             #
             strlist.append([i, symbol, exp_date, temp_Close, Strike_High,Strike_Low,
                             CE_H_IV, CE_L_IV, PE_H_IV, PE_L_IV, days_to_expire,
-                            ce_maxpain, pe_maxpain, maxpain, mp_strike_pr, CE_OI_Max2_St_Pr,
-                            CE_OI_Max2_CHG_OI,
+                            ce_maxpain, pe_maxpain, maxpain, mp_strike_pr,
+                            CE_OI_Max2_St_Pr, CE_OI_Max2_CHG_OI,
                             CE_OI_Max1_St_Pr, CE_OI_Max1_CHG_OI,
-                            PE_OI_Max2_St_Pr, CE_OI_Max2_CHG_OI,
-                            PE_OI_Max2_St_Pr, CE_OI_Max2_CHG_OI])
+                            PE_OI_Max2_St_Pr, PE_OI_Max2_CHG_OI,
+                            PE_OI_Max1_St_Pr, PE_OI_Max1_CHG_OI])
             implobj = ImpliedVolatility()
             implobj.save_data(strlist)
         mask_F = (Df['SYMBOL'] == symbol) & (Df['INSTRUMENT'].str.contains('FUT'))

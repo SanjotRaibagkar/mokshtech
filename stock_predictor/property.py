@@ -35,10 +35,11 @@ stockdata=os.path.join(dbpath,'stockdata')
 stockdatadelta = os.path.join(dbpath,'stockdata_delta')
 optiondata = os.path.join(dbpath,'optiondata')
 optiondata_day = os.path.join(dbpath,'optiondata_day')
-symbollist = os.path.join(stockdata,'symbollist.csv')
+symbollist = os.path.join(dbpath,'symbollist.csv')
 
 sqldb = os.path.join(dbpath,'sqlite')
 #stockdata=os.path.join(dbpath,'stockdata_1')
+
 featurescsv=os.path.join(dbpath,'features.csv')
 featuresdata=os.path.join(dbpath,'featuresdata.csv')
 repobasepath = os.path.join(basepath,'report')

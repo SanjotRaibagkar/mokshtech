@@ -11,12 +11,7 @@ import pandas as pd
 
 
 
-latest_derivative_query = "SELECT max(to_date(Date, 'DD Mon YYYY'))  from derivativeData;"
 
-min_max_symbol_date_query = "SELECT min(to_date(maxSymbolDate, 'DD Mon YYYY')) from " \
-                            "(SELECT max(to_date(Date, 'DD Mon YYYY'))" \
-                            "  from StockData where SYMBOL in " \
-                            "(SELECT Distinct SYMBOL  from StockData) as maxSymbolDate)"
 
 
 try:
