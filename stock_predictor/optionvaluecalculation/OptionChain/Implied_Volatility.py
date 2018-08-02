@@ -12,12 +12,13 @@ from optionvaluecalculation.OptionChain import OIMAXPAIN
 from utility.dbutilities.dbqueries import *
 class ImpliedVolatility(object):
     """"""
-    def __init__(self,symbol="NIFTY",Dffile='abc.csv',DfFlag=False):
+    def __init__(self,conn,dbq,symbol="NIFTY",Dffile='abc.csv',DfFlag=False):
         self.DfFlag = DfFlag
         self.Dffile = Dffile
         self.Symbol = symbol
         self.striklist=[]
-
+        self.dbq = dbq
+        self.con = conn
 
     def load_Data(self):
         """
@@ -52,14 +53,14 @@ class ImpliedVolatility(object):
         else:
             self.striklist_DF.to_csv(OptionsIV, header=True)
         try:
-            dbq = db_queries()
-            dbq.df_sql(self.striklist_DF,'MaxpainIV')
+            self.con = self.dbq.df_sql(self.striklist_DF,'MaxpainIV',self.con)
+            self.con.commit;
         except Exception as e:
-            print("IMP V 4 ",e)
+            print("IMP Vol 4 ",e)
 
     def getSymbolStrike(self,symbol="NIFTY",Df=pd.DataFrame(),x=0):
         print(symbol)
-        def getDateStrike(i):
+        def getDateStrike(i,dbq,con):
             strlist = []
             temp_Close = Df_F.loc[Df_F[date] == i][close].tolist()[x]
             exp_date = Df_F.loc[Df_F[close] == temp_Close]['EXPIRY_DT'].tolist()[0]
@@ -136,19 +137,22 @@ class ImpliedVolatility(object):
                             CE_OI_Max1_St_Pr, CE_OI_Max1_CHG_OI,
                             PE_OI_Max2_St_Pr, PE_OI_Max2_CHG_OI,
                             PE_OI_Max1_St_Pr, PE_OI_Max1_CHG_OI])
-            implobj = ImpliedVolatility()
+            implobj = ImpliedVolatility(dbq = dbq, conn = con)
             implobj.save_data(strlist)
         mask_F = (Df['SYMBOL'] == symbol) & (Df['INSTRUMENT'].str.contains('FUT'))
         mask_O = (Df['SYMBOL'] == symbol) & (Df['INSTRUMENT'].str.contains('OPT'))
         Df_F = Df.loc[mask_F]
         DF_O = Df.loc[mask_O]
-
         Dates_F = pd.Series(Df.loc[mask_F]['Date'].unique())
-        #try:
-        Dates_F.apply(getDateStrike)
-        #except Exception as e:
-        #print("error Implied_Volatility1 ",Dates_F, e)
-        # self.save_data()
+        try:
+            dbq = self.dbq
+            con = self.con
+            Dates_F.apply(getDateStrike,args=(dbq,con))
+        except IndexError as e:
+            pass
+            #log.debug(e)
+        except Exception as e:
+            print("error Implied_Volatility1 ",Dates_F, e)
 
     def getStrike(self):
         Df = self.load_Data()
@@ -158,7 +162,7 @@ class ImpliedVolatility(object):
         #              'NIFTYCPSE',
         #              ]
         # symbols = pd.Series(symbols)
-        x_no = [0,1,2]
+        x_no = [0,1,2,3,4,5,6]
         try:
             #a = list(map(lambda x:symbols.apply(self.getSymbolStrike,args=(Df=Df,x=x,)),x_no))
             for i in symbols:
@@ -171,5 +175,12 @@ class ImpliedVolatility(object):
             print("error Implied_Volatility3 ",e,i,x_no)
 
 if __name__ == '__main__':
-    implobj = ImpliedVolatility()
-    implobj.getStrike()
+    try:
+        dbq = db_queries()
+        con = dbq.create_connection()
+        implobj = ImpliedVolatility(dbq=dbq,conn=con)
+        implobj.getStrike()
+    except Exception as e:
+        print("IMVo 5 ", e)
+    finally:
+        dbq.close_conn(conn=con)

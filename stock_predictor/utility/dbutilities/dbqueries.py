@@ -41,7 +41,7 @@ class db_queries(object):
         print("Opened database successfully")
         return conn
 
-    def create_connection(self,db_file):
+    def create_connection(self,db_file=dbp.database):
         """ create a database connection to a SQLite database """
         try:
             conn = sqlite3.connect(db_file)
@@ -56,6 +56,7 @@ class db_queries(object):
     def close_conn(self,conn):
         try:
             conn.close()
+            print("connection close")
         except Exception as e:
             print("dbqueries 2",e)
 
@@ -111,12 +112,12 @@ class db_queries(object):
 
 
 
-    def df_sql(self,df,table):
+    def df_sql(self,df,table,con):
         try:
-            con = self.create_connection(self.database)
-            df.to_sql(name=table,con=con)
+            df.to_sql(name=table,con=con,if_exists='append')
             con.commit()
         except Exception as e:
             print(e," dbqueries 3 ")
         finally:
-            self.close_conn()
+            return con
+

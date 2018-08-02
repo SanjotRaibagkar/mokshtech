@@ -7,6 +7,7 @@ from optionvaluecalculation.OptionChain.Implied_Volatility import ImpliedVolatil
 from utility import getstart as gs, filterframe
 import property as p
 from utility.dbutilities import appendDB
+from utility.dbutilities.dbqueries import *
 
 try:
     import numpy as np
@@ -99,14 +100,21 @@ def get_year_data(year,Flag=False,Start = date(2018,1,1)):
             old_prices = pd.read_csv(fname)
             old_prices.rename(columns={"TIMESTAMP": "Date"})
             price.append(old_prices)
-        def concat_Data(x):
+        def concat_Data(x,dbq,con):
             print(x)
             price_df = get_price_list(dt=x)
             price_df.to_csv(fname_day)
             price.append(price_df)
-            implobj = ImpliedVolatility(Dffile=fname_day,DfFlag=True)
+            implobj = ImpliedVolatility(Dffile=fname_day,DfFlag=True,dbq=dbq,conn=con)
             implobj.getStrike()
-        tradingDay.apply(concat_Data)
+        try:
+            dbq = db_queries()
+            con = dbq.create_connection()
+            tradingDay.apply(concat_Data,args=(dbq,con,))
+        except Exception as e:
+            print("nseoptionchain 4 ", e)
+        finally:
+            dbq.close_conn(conn=con)
         if len(price) > 0:
             prices = pd.concat(price)
             prices = filterframe.filtered_frame(prices,Options=True)
@@ -156,7 +164,7 @@ def appendData():
     get_year_data(now.year,True,latestdate)
 
 
-years_series=pd.Series([2017,2018])
+years_series=pd.Series([2018])
 if __name__ == '__main__':
     years_series.apply(get_year_data)
     # appendData()
