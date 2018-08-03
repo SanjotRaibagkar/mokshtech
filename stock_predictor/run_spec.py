@@ -3,3 +3,6 @@ from database import *
 from optionvaluecalculation.OptionChain import *
 from optionvaluecalculation.Futures import *
 from report import *
+from optionvaluecalculation.strategies import *
+
+
