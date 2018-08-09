@@ -9,6 +9,9 @@ import property as p
 from nsetools import Nse
 import os
 
+import os
+import property as p
+
 nse = Nse()
 
 # print(nse)
@@ -45,6 +48,8 @@ class db_queries(object):
         """ create a database connection to a SQLite database """
         try:
             conn = sqlite3.connect(db_file)
+            # shz: fix error with non-ASCII input
+            # conn.text_factory = str
             print(sqlite3.version)
         except Error as e:
             import traceback
@@ -61,6 +66,7 @@ class db_queries(object):
             print("dbqueries 2",e)
 
     def exe(self,conn,query):
+        print(conn)
         cur = conn.cursor()
         cur.execute(query)
         return cur
@@ -72,19 +78,15 @@ class db_queries(object):
         df.to_sql(table, engine)
 
 
-    def uploadData(self,x,table,cur):
-        print(x)
+    def csv_sql(self,table,csvfile,con):
         try:
-            with open(x, 'r') as f:
-                # Notice that we don't need the `csv` module.
-                next(f)  # Skip the header row.
-                cur.copy_from(f, table, sep=',')
-                conn.commit()
+            con = convert(csvfile,dbpath=self.database,table=table,conn=con)
         except Exception as e:
-            print(x,e)
+            import stack_trace
+            print(stack_trace,e)
         finally:
-            pass
-            conn.commit()
+            return con
+
 
     def abc(self):
 

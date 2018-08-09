@@ -23,8 +23,10 @@ except Exception as e:
 
 def get_latest_dates(query,conn):
         try:
+            print(conn)
             cur = dbobj.exe(conn, query)
-            rows = cur.fetchall()[0][0]
+            rows = cur.fetchall()
+            print(len(rows),rows)
             latestday = datetime.strptime(str(rows+timedelta(1)), '%Y-%m-%d').strftime('%d-%b-%Y')
             return latestday
         except Exception as e:
@@ -34,7 +36,10 @@ def get_latest_dates(query,conn):
 def get_latest(x):
     if x == 'latestday_der':
         try:
-            return get_latest_dates(latest_derivative_query, conn)
+            late_date =  get_latest_dates(latest_derivative_query, conn)
+            print(type(late_date))
+            exit(1)
+
         except Exception as e:
             print("DB not connected")
     elif x == 'latestday_stock':
@@ -61,5 +66,5 @@ datetime.strptime("2013-1-25", '%Y-%m-%d').strftime('%d-%b-%Y')
 
 if __name__ == '__main__':
     pass
-    print(get_latest('latestday_stock'))
+    print(get_latest('latestday_der'))
 

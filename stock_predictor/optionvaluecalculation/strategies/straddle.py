@@ -1,3 +1,5 @@
+import numpy as np
+import pandas as pd
 
 
 def get_maxriskrwward():
@@ -73,3 +75,28 @@ def get_maxriskrwward():
     # plt.ylabel('Profit and loss')
     # plt.legend()
     # plt.show()
+
+
+class Strategies():
+    def __init__(self):
+        pass
+
+    def call_payoff(self,sT, strike_price, premium):
+        '''
+        1. Long Pay off
+        When to Use: Investor is very bullish on the stock / index.
+        Risk: Limited to the Premium.
+        (Maximum loss if market expires at or below the option strike price).
+        Reward: Unlimited
+        Breakeven: Strike Price + Premium
+
+        :param sT: Spot price list
+        :param strike_price: strike price
+        :param premium: premium
+        :return: List for call payoff for each spot price.
+        '''
+        return np.where(sT > strike_price, sT - strike_price, 0) - premium
+
+    payoff_long_call = call_payoff (sT, Long_call_StPr, Long_call_prm)
+
+    payoff_short_call = call_payoff(sT, Short_call_StPr, Short_call_prm) * -1.0

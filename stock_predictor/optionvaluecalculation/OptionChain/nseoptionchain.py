@@ -1,22 +1,25 @@
-import requests as req
-from datetime import date, datetime
-from calendar import monthrange
-import os
+try:
+    import requests as req
+    from datetime import date, datetime
+    from calendar import monthrange
+    import os
 
-from optionvaluecalculation.OptionChain.Implied_Volatility import ImpliedVolatility
-from utility import getstart as gs, filterframe
-import property as p
+    from optionvaluecalculation.OptionChain.Implied_Volatility import ImpliedVolatility
+    from utility import getstart as gs, filterframe
+    import numpy as np
+    import nsepy
+    from bs4 import BeautifulSoup
+    from io import StringIO, BytesIO
+    import property as p
+
+except Exception as e:
+        print(e)
+
+import pandas as pd
 from utility.dbutilities import appendDB
 from utility.dbutilities.dbqueries import *
 
-try:
-    import numpy as np
-    import pandas as pd
-except:
-        pass
-import nsepy
-from bs4 import BeautifulSoup
-from io import StringIO, BytesIO
+
 
 
 PRICE_LIST_URL = 'http://www.nseindia.com/content/historical/DERIVATIVES/%s/%s/fo%sbhav.csv.zip'
@@ -74,13 +77,16 @@ def get_year_data(year,Flag=False,Start = date(2018,1,1)):
     if Flag :
         m = range(now.month,now.month+1)
     else:
-        m = range(1,13)
+        m = range(1,2)
     for i in m:
         if Flag:
             start = str(Start)
             start = date(int(start[0:4]),int(start[5:7]),int(start[8:10]))
         else:
-            start = date(year, i, 1)
+            start = date(year, i, 25)
+        print(m,start)
+
+
         if year < now.year:
             end = date(year, i, monthrange(year, i)[1])
         elif (year == now.year and i <= now.month):
@@ -90,6 +96,7 @@ def get_year_data(year,Flag=False,Start = date(2018,1,1)):
         print(start,end)
         try:
             tradingDay=get_tradingDay(start,end)
+            print('1',tradingDay)
         except Exception as e:
             print("nseoptions error 2 ", e)
         filename=str("prices_")+str(year)+"_"+str(i)+".csv"
@@ -168,3 +175,5 @@ years_series=pd.Series([2018])
 if __name__ == '__main__':
     years_series.apply(get_year_data)
     # appendData()
+
+

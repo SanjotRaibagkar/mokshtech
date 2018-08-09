@@ -9,6 +9,7 @@ from optionvaluecalculation.OptionChain import optionChainData
 from optionvaluecalculation.OptionChain.optionChainData import get_tradingDay
 from optionvaluecalculation.optionvalueprop import *
 from optionvaluecalculation.OptionChain import OIMAXPAIN
+from optionvaluecalculation.utility import getStrikes
 from utility.dbutilities.dbqueries import *
 class ImpliedVolatility(object):
     """"""
@@ -29,7 +30,7 @@ class ImpliedVolatility(object):
         if self.DfFlag:
             Df = pd.read_csv(self.Dffile)
         else:
-            #optionChainData.appendData()  # get the Latest data.
+            optionChainData.appendData()  # get the Latest data.
             currentFile = optionChainData.get_OptionFile(True) # Get current month Option Data File.
             lastDate = getstart.get_date(currentFile,Options=True)
             print(lastDate)
@@ -53,10 +54,15 @@ class ImpliedVolatility(object):
         else:
             self.striklist_DF.to_csv(OptionsIV, header=True)
         try:
-            self.con = self.dbq.df_sql(self.striklist_DF,'MaxpainIV',self.con)
-            self.con.commit;
+            self.con = self.dbq.df_sql(self.striklist_DF,tb_MaxpainIV,self.con)
         except Exception as e:
             print("IMP Vol 4 ",e)
+            try:
+                self.striklist_DF.to_csv(OptionsIV_temp, mode='a', header=False)
+                self.con = self.dbq.csv_sql(OptionsIV_temp,tb_MaxpainIV,self.con)
+            except Exception as e:
+                print("IMP Vol 5 ",e)
+
 
     def getSymbolStrike(self,symbol="NIFTY",Df=pd.DataFrame(),x=0):
         print(symbol)
@@ -66,9 +72,12 @@ class ImpliedVolatility(object):
             exp_date = Df_F.loc[Df_F[close] == temp_Close]['EXPIRY_DT'].tolist()[0]
 
             temp_OI = DF_O.loc[DF_O[date] == i]['STRIKE_PR'].tolist()[-2:]
-            diff = abs(temp_OI[0] - temp_OI[1])
-            Strike_High = temp_Close + (diff - (temp_Close % diff))  # Get smallest no from larger no then Close
-            Strike_Low = temp_Close + - (temp_Close % diff)  # Get largest no from smaller then Close
+
+            diff, Strike_High, Strike_Low = getStrikes.getStrikes(temp_Close,temp_OI)
+
+            # diff = abs(temp_OI[0] - temp_OI[1])
+            # Strike_High = temp_Close + (diff - (temp_Close % diff))  # Get smallest no from larger no then Close
+            # Strike_Low = temp_Close + - (temp_Close % diff)  # Get largest no from smaller then Close
             Strike_High_mask_CE = (DF_O[date] == i)\
                                   & (DF_O['STRIKE_PR'] == Strike_High)\
                                   & (DF_O['EXPIRY_DT'] == exp_date)\
@@ -110,8 +119,6 @@ class ImpliedVolatility(object):
             CE_OI_Max2,CE_OI_Max1 = sorted(r1['CE'].tolist())[-2:]
             PE_OI_Max2,PE_OI_Max1 = sorted(r1['PE'].tolist())[-2:]
 
-            # print(CE_OI_Max2,CE_OI_Max1,PE_OI_Max2,PE_OI_Max1)
-            # DF_test.to_csv('DFtest.csv')
             CE_OI_Max2_St_Pr,CE_OI_Max2_CHG_OI = DF_test.loc[DF_test['OPEN_INT'] == CE_OI_Max2][['STRIKE_PR','CHG_IN_OI']].values[0][-2:]
             CE_OI_Max1_St_Pr,CE_OI_Max1_CHG_OI = DF_test.loc[DF_test['OPEN_INT'] == CE_OI_Max1][['STRIKE_PR','CHG_IN_OI']].values[0][-2:]
             PE_OI_Max2_St_Pr,PE_OI_Max2_CHG_OI = DF_test.loc[DF_test['OPEN_INT'] == PE_OI_Max2][['STRIKE_PR','CHG_IN_OI']].values[0][-2:]
