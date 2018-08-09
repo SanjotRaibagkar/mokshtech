@@ -1,3 +1,5 @@
+from optionvaluecalculation.optionvalueprop import tb_DerivativeData
+
 try:
     import requests as req
     from datetime import date, datetime
@@ -66,6 +68,21 @@ def get_tradingDay(start,end):
                     end=end,
                     index=True)).index)
 
+def save_data(dbq,con,DF,table,file,tempfile):
+    if os.path.isfile(file):
+        DF.to_csv(file,mode='a')
+        DF.to_csv(tempfile, header=True)
+    try:
+        con = dbq.df_sql(DF, table, con)
+    except Exception as e:
+        print("IMP Vol 4 ", e)
+        try:
+            con = dbq.csv_sql(tempfile, table, con)
+        except Exception as e:
+            print("nseoptionachain 5 ", e)
+    finally:
+        return con
+
 def get_year_data(year,Flag=False,Start = date(2018,1,1)):
     """
     :param year: year of Data
@@ -83,10 +100,8 @@ def get_year_data(year,Flag=False,Start = date(2018,1,1)):
             start = str(Start)
             start = date(int(start[0:4]),int(start[5:7]),int(start[8:10]))
         else:
-            start = date(year, i, 25)
+            start = date(year, i, 1)
         print(m,start)
-
-
         if year < now.year:
             end = date(year, i, monthrange(year, i)[1])
         elif (year == now.year and i <= now.month):
@@ -96,24 +111,28 @@ def get_year_data(year,Flag=False,Start = date(2018,1,1)):
         print(start,end)
         try:
             tradingDay=get_tradingDay(start,end)
-            print('1',tradingDay)
         except Exception as e:
             print("nseoptions error 2 ", e)
         filename=str("prices_")+str(year)+"_"+str(i)+".csv"
         fname = os.path.join(p.optiondata,filename)
         fname_day = os.path.join(p.optiondata_day,filename)
         price=[]
-        if Flag and os.path.isfile(fname):
-            old_prices = pd.read_csv(fname)
-            old_prices.rename(columns={"TIMESTAMP": "Date"})
-            price.append(old_prices)
+        # if Flag and os.path.isfile(fname):
+        #     old_prices = pd.read_csv(fname)
+        #     old_prices.rename(columns={"TIMESTAMP": "Date"})
+        #     price.append(old_prices)
         def concat_Data(x,dbq,con):
             print(x)
             price_df = get_price_list(dt=x)
-            price_df.to_csv(fname_day)
             price.append(price_df)
-            implobj = ImpliedVolatility(Dffile=fname_day,DfFlag=True,dbq=dbq,conn=con)
-            implobj.getStrike()
+            if len(price) > 0:
+                prices = pd.concat(price)
+                prices = filterframe.filtered_frame(prices, Options=True)
+                save_data(dbq, con, prices, tb_DerivativeData, fname, fname_day)
+                implobj = ImpliedVolatility(Dffile=fname_day, DfFlag=True, dbq=dbq, conn=con)
+                implobj.getStrike()
+            else:
+                print("no data to recieve for ",x)
         try:
             dbq = db_queries()
             con = dbq.create_connection()
@@ -122,13 +141,7 @@ def get_year_data(year,Flag=False,Start = date(2018,1,1)):
             print("nseoptionchain 4 ", e)
         finally:
             dbq.close_conn(conn=con)
-        if len(price) > 0:
-            prices = pd.concat(price)
-            prices = filterframe.filtered_frame(prices,Options=True)
-            prices.to_csv(fname)
-            #uploadStockData.upload_OptionsData()
-        else:
-            print("no data to recieve")
+
 
 
 ### code to append data
@@ -174,6 +187,6 @@ def appendData():
 years_series=pd.Series([2018])
 if __name__ == '__main__':
     years_series.apply(get_year_data)
-    # appendData()
+    appendData()
 
 

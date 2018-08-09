@@ -10,6 +10,7 @@ from optionvaluecalculation.OptionChain.optionChainData import get_tradingDay
 from optionvaluecalculation.optionvalueprop import *
 from optionvaluecalculation.OptionChain import OIMAXPAIN
 from optionvaluecalculation.utility import getStrikes
+from utility.dbutilities.dbproperties import sqlmokshtechdb
 from utility.dbutilities.dbqueries import *
 class ImpliedVolatility(object):
     """"""
@@ -31,10 +32,10 @@ class ImpliedVolatility(object):
             Df = pd.read_csv(self.Dffile)
         else:
             optionChainData.appendData()  # get the Latest data.
-            currentFile = optionChainData.get_OptionFile(True) # Get current month Option Data File.
-            lastDate = getstart.get_date(currentFile,Options=True)
-            print(lastDate)
-            currentFile = os.path.join(p.optiondata,"prices_2016.csv")
+            # currentFile = 'prices_2018_5.csv' #optionChainData.get_OptionFile(True) # Get current month Option Data File.
+            # lastDate = getstart.get_date(currentFile,Options=True)
+            # print(lastDate)
+            currentFile = os.path.join(p.optiondata,"prices_2018_7.csv")
             Df = pd.read_csv(currentFile)
         return Df
 
@@ -184,7 +185,7 @@ class ImpliedVolatility(object):
 if __name__ == '__main__':
     try:
         dbq = db_queries()
-        con = dbq.create_connection()
+        con = dbq.create_connection(db_file=sqlmokshtechdb)
         implobj = ImpliedVolatility(dbq=dbq,conn=con)
         implobj.getStrike()
     except Exception as e:

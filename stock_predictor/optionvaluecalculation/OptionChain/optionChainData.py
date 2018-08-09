@@ -5,6 +5,7 @@ try:
     from calendar import monthrange
     import os
     from utility import getstart as gs, filterframe
+    from utility.dbutilities import dbqueries as dbq
     import property as p
     import numpy as np
     import pandas as pd
@@ -57,6 +58,7 @@ def get_tradingDay(startdate,enddate,tradingFlag=True):
         end = datetime.strptime(enddate,"%d-%b-%Y") # date from where we need to download
     else:
         start, end = startdate, enddate
+        print('1',1)
     if tradingFlag:
         return pd.Series(pd.DataFrame(nsepy.get_history(symbol='NIFTY',
                 start=start,
@@ -157,8 +159,8 @@ def get_OptionFile(cuurent=False):
     return monthFile
 
 if __name__ == '__main__':
-    years_series.apply(get_year_data)
-    #appendData()
+    #years_series.apply(get_year_data)
+    appendData()
 
 
 # 18-JUL-2018,NIFTY,26-Jul-2018,10978.6,11000.0,10900.0,32.55462646484375,34.60693359375,35.125732421875,38.543701171875

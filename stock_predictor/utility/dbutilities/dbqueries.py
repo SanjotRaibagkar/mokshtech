@@ -1,3 +1,4 @@
+
 import psycopg2
 import nsepy
 import sqlite3
@@ -8,8 +9,7 @@ from utility.dbutilities import  dbproperties as dbp
 import property as p
 from nsetools import Nse
 import os
-
-import os
+import datetime
 import property as p
 
 nse = Nse()
@@ -51,12 +51,12 @@ class db_queries(object):
             # shz: fix error with non-ASCII input
             # conn.text_factory = str
             print(sqlite3.version)
+            return conn
         except Error as e:
             import traceback
             print("dbqueries 1 ",traceback.extract_stack())
             print(e)
-        finally:
-            return conn
+
 
     def close_conn(self,conn):
         try:
@@ -65,11 +65,11 @@ class db_queries(object):
         except Exception as e:
             print("dbqueries 2",e)
 
-    def exe(self,conn,query):
-        print(conn)
+    def exec(self,conn,query):
         cur = conn.cursor()
         cur.execute(query)
         return cur
+
 
     def df2db_posgress(self, df, table):
         engineurl = 'postgresql://'+self.user+':'+self.password+'@'+self.host+':'+self.port+'/'+self.database
@@ -114,12 +114,40 @@ class db_queries(object):
 
 
 
+
+
     def df_sql(self,df,table,con):
         try:
-            df.to_sql(name=table,con=con,if_exists='append')
+            df.to_sql(name=table,con=con,if_exists='append',index=False)
             con.commit()
         except Exception as e:
             print(e," dbqueries 3 ")
         finally:
             return con
 
+def getlatestDerivative():
+        try:
+            db = os.path.join(p.sqldb, 'mokshtechdatabase.db')
+            dbqo = db_queries()
+            query = dbp.latest_derivative_query
+            con = dbqo.create_connection(db_file=db)
+            cur = con.cursor()
+            rows = cur.execute(query)
+            rows = rows.fetchall()[0][0]
+            rows_y = int(rows[:4])
+            rows_d = int(rows[6:8])
+            rows_m = int('0' + rows[4:6])
+            rows = datetime.date(rows_y, rows_m, rows_d)
+            # if len(rows)>8:
+            #     pass
+            # placde holder for mins
+            latestday = datetime.datetime.strptime(str(rows + datetime.timedelta(1)), '%Y-%m-%d').strftime('%d-%b-%Y')
+            print('latest_start_day',latestday)
+            con.close()
+            return latestday
+        except Exception as e:
+            print(e)
+
+
+
+# uploadStockData.upload_OptionsData()

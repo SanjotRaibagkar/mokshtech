@@ -7,6 +7,8 @@ from utility import getDataunit as du
 import format_data as fd
 import pandas as pd
 
+from utility.dbutilities.dbqueries import getlatestDerivative
+
 y,m,n=p.y,p.m,p.d
 start=date(y,m,n)
 stockfoldpath=p.stockdata
@@ -21,7 +23,7 @@ def get_date(symbfile,Options):
         except Exception as e:
             a = pd.read_csv(symbfile)['TIMESTAMP'].dropna().unique()
         if Options:
-            d = a[-1]
+            d = getlatestDerivative()# a[-1]
         elif len(a) < 2:
             print(symbfile, 'file is empty')
             d = start
