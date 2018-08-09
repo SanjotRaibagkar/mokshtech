@@ -23,7 +23,10 @@ else:
     read_mode = 'rU'
 
 
-def convert(filepath_or_fileobj, dbpath, table, headerspath_or_fileobj=None, compression=None, typespath_or_fileobj=None):
+def convert(filepath_or_fileobj, dbpath, table,conn, headerspath_or_fileobj=None, compression=None, typespath_or_fileobj=None):
+
+    c = conn.cursor()
+
     if isinstance(filepath_or_fileobj, string_types):
         if compression is None:
             fo = open(filepath_or_fileobj, mode=read_mode)
@@ -83,11 +86,6 @@ def convert(filepath_or_fileobj, dbpath, table, headerspath_or_fileobj=None, com
     if not header_given: # Skip the header
         next(reader)
 
-    conn = sqlite3.connect(dbpath)
-    # shz: fix error with non-ASCII input
-    conn.text_factory = str
-    c = conn.cursor()
-
     try:
         create_query = 'CREATE TABLE %s (%s)' % (table, _columns)
         c.execute(create_query)
@@ -118,7 +116,7 @@ def convert(filepath_or_fileobj, dbpath, table, headerspath_or_fileobj=None, com
 
 
     conn.commit()
-    c.close()
+    return conn
 
 def _guess_types(reader, number_of_columns, max_sample_size=100):
     '''Guess column types (as for SQLite) of CSV.

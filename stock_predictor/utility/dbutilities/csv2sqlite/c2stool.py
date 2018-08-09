@@ -10,19 +10,22 @@ from io import BytesIO, StringIO
 import property as p
 from utility.dbutilities.csv2sqlite.csv2sqlite import convert
 
-DEFAULT_TABLE_NAME = 'StockData'
-TEMP_DB_PATH = os.path.join(p.dbpath, 'mokshtechdatabase.db')
 
-class Csv2SqliteTestCase(unittest.TestCase):
+class Csv2Sqlite(object):
+    def __init__(self,db='mokshtechdatabase.db',table='xyz'):
+        self.TEMP_DB_PATH = os.path.join(p.sqldb,db )
+        self.DEFAULT_TABLE_NAME = table
+
     def setUp(self):
-        if os.path.exists(TEMP_DB_PATH):
+        if os.path.exists(self.TEMP_DB_PATH):
             pass
-            #os.remove(TEMP_DB_PATH)
+            #os.remove(self.TEMP_DB_PATH)
 
-    def convert_csv(self, csv, table = DEFAULT_TABLE_NAME, headers = None, types = None):
+    def convert_csv(self, csv, headers = None, types = None):
         '''Converts a CSV to a SQLite database and returns a database cursor
            into the resulting file'''
-        dbpath = TEMP_DB_PATH
+        dbpath = self.TEMP_DB_PATH
+        table = self.DEFAULT_TABLE_NAME
         if headers is not None:
             try:
                 headerObj = StringIO(headers)
@@ -46,10 +49,11 @@ class Csv2SqliteTestCase(unittest.TestCase):
         c = conn.cursor()
         return c
 
-    def convert_file(self, path, table = DEFAULT_TABLE_NAME, compression = None):
+    def convert_file(self, path,  compression = None):
         '''Converts a CSV file to a SQLite database and returns a database cursor
            into the resulting file'''
-        dbpath = TEMP_DB_PATH
+        dbpath = self.TEMP_DB_PATH
+        table = self.DEFAULT_TABLE_NAME,
         convert(path, dbpath, table, compression=compression)
         conn = sqlite3.connect(dbpath)
         c = conn.cursor()
@@ -63,7 +67,7 @@ class Csv2SqliteTestCase(unittest.TestCase):
     xyz,2,2.0
     efg,3,3.0'''
         )
-        c.execute('SELECT COUNT(heading_3) FROM %s' % DEFAULT_TABLE_NAME);
+        c.execute('SELECT COUNT(heading_3) FROM %s' % self.DEFAULT_TABLE_NAME);
         row = next(c)
         self.assertEqual(row[0], 3)
 
@@ -75,7 +79,7 @@ class Csv2SqliteTestCase(unittest.TestCase):
     xyz;2;2,0
     efg;3;3,0'''
         )
-        c.execute('SELECT COUNT(heading_3) FROM %s' % DEFAULT_TABLE_NAME);
+        c.execute('SELECT COUNT(heading_3) FROM %s' % self.DEFAULT_TABLE_NAME);
         row = next(c)
         self.assertEqual(row[0], 3)
 
@@ -85,13 +89,13 @@ class Csv2SqliteTestCase(unittest.TestCase):
               xyz,2,2,1'''
         headers = '''heading_1,heading_2,heading_3,heading_4'''
         c = self.convert_csv(csv, headers=headers)
-        c.execute('SELECT COUNT(heading_3) FROM %s' % DEFAULT_TABLE_NAME);
+        c.execute('SELECT COUNT(heading_3) FROM %s' % self.DEFAULT_TABLE_NAME);
         row = next(c)
         self.assertEqual(row[0], 2)
 
     def test_strips_headers(self):
         c = self.convert_csv('''col_a    , col_b''')
-        c.execute('SELECT sql FROM sqlite_master WHERE name = "%s"' % DEFAULT_TABLE_NAME)
+        c.execute('SELECT sql FROM sqlite_master WHERE name = "%s"' % self.DEFAULT_TABLE_NAME)
         row = next(c)
         self.assertEqual(row[0], 'CREATE TABLE data ("col_a" text,"col_b" text)')
 
@@ -100,7 +104,7 @@ class Csv2SqliteTestCase(unittest.TestCase):
         csv = "one,two,three\n1,1,abc\n2,2,xyz"
         types = "integer,real,text"
         c = self.convert_csv(csv, types=types)
-        c.execute('PRAGMA table_info(%s)' % DEFAULT_TABLE_NAME)
+        c.execute('PRAGMA table_info(%s)' % self.DEFAULT_TABLE_NAME)
         row = next(c)
         self.assertEqual(row[2], 'integer')
         row = next(c)
@@ -116,7 +120,7 @@ class Csv2SqliteTestCase(unittest.TestCase):
     ,
     1,text'''
         )
-        c.execute('SELECT sql FROM sqlite_master WHERE name = "%s"' % DEFAULT_TABLE_NAME)
+        c.execute('SELECT sql FROM sqlite_master WHERE name = "%s"' % self.DEFAULT_TABLE_NAME)
         row = next(c)
         self.assertEqual(row[0], 'CREATE TABLE data ("col_a" integer,"col_b" text)')
 
@@ -129,7 +133,7 @@ class Csv2SqliteTestCase(unittest.TestCase):
                              xyz,2,2.0
                              efg,3,3.0''')
         c = self.convert_file(csvFile)
-        c.execute('SELECT COUNT(heading_3) FROM %s' % DEFAULT_TABLE_NAME)
+        c.execute('SELECT COUNT(heading_3) FROM %s' % self.DEFAULT_TABLE_NAME)
         row = next(c)
         self.assertEqual(row[0], 3)
         os.remove(csvFile)
@@ -149,7 +153,7 @@ class Csv2SqliteTestCase(unittest.TestCase):
                                 xyz,2,2.0
                                 efg,3,3.0''', 'utf8'))
         c = self.convert_file(gzFile, compression='gzip')
-        c.execute('SELECT COUNT(heading_3) FROM %s' % DEFAULT_TABLE_NAME)
+        c.execute('SELECT COUNT(heading_3) FROM %s' % self.DEFAULT_TABLE_NAME)
         row = next(c)
         self.assertEqual(row[0], 3)
         os.remove(gzFile)
@@ -169,7 +173,7 @@ class Csv2SqliteTestCase(unittest.TestCase):
                                 xyz,2,2.0
                                 efg,3,3.0''', 'utf8'))
         c = self.convert_file(bz2File, compression='bz2')
-        c.execute('SELECT COUNT(heading_3) FROM %s' % DEFAULT_TABLE_NAME)
+        c.execute('SELECT COUNT(heading_3) FROM %s' % self.DEFAULT_TABLE_NAME)
         row = next(c)
         self.assertEqual(row[0], 3)
         os.remove(bz2File)
