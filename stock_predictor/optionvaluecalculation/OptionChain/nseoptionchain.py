@@ -1,25 +1,20 @@
 from optionvaluecalculation.optionvalueprop import tb_DerivativeData
-
-try:
-    import requests as req
-    from datetime import date, datetime
-    from calendar import monthrange
-    import os
-
-    from optionvaluecalculation.OptionChain.Implied_Volatility import ImpliedVolatility
-    from utility import getstart as gs, filterframe
-    import numpy as np
-    import nsepy
-    from bs4 import BeautifulSoup
-    from io import StringIO, BytesIO
-    import property as p
-
-except Exception as e:
-        print(e)
-
-import pandas as pd
-from utility.dbutilities import appendDB
+from optionvaluecalculation.OptionChain.Implied_Volatility import ImpliedVolatility
+from utility import getstart as gs, filterframe
 from utility.dbutilities.dbqueries import *
+import property as p
+
+import requests as req
+from datetime import date, datetime
+from calendar import monthrange
+import os
+import pandas as pd
+# import numpy as np
+import nsepy
+# from bs4 import BeautifulSoup
+from io import StringIO, BytesIO
+
+
 
 
 
@@ -69,18 +64,14 @@ def get_tradingDay(start,end):
                     index=True)).index)
 
 def save_data(dbq,con,DF,table,file,tempfile):
-    if os.path.isfile(file):
-        DF.to_csv(file,mode='a')
-        DF.to_csv(tempfile, header=True)
+    DF.to_csv(file,mode='a')
     try:
-        con = dbq.df_sql(DF, table, con)
+        DF.to_csv(tempfile, header=True)
+        con = convert(tempfile, dbpath=dbp.sqlmokshtechdb, table=table, conn=con)
     except Exception as e:
-        print("IMP Vol 4 ", e)
-        try:
-            con = dbq.csv_sql(tempfile, table, con)
-        except Exception as e:
-            print("nseoptionachain 5 ", e)
+        print("nseoptionachain 5 ", e)
     finally:
+        con.commit()
         return con
 
 def get_year_data(year,Flag=False,Start = date(2018,1,1)):
@@ -94,14 +85,13 @@ def get_year_data(year,Flag=False,Start = date(2018,1,1)):
     if Flag :
         m = range(now.month,now.month+1)
     else:
-        m = range(1,2)
+        m = range(1,13)
     for i in m:
         if Flag:
             start = str(Start)
             start = date(int(start[0:4]),int(start[5:7]),int(start[8:10]))
         else:
             start = date(year, i, 1)
-        print(m,start)
         if year < now.year:
             end = date(year, i, monthrange(year, i)[1])
         elif (year == now.year and i <= now.month):
@@ -116,7 +106,7 @@ def get_year_data(year,Flag=False,Start = date(2018,1,1)):
         filename=str("prices_")+str(year)+"_"+str(i)+".csv"
         fname = os.path.join(p.optiondata,filename)
         fname_day = os.path.join(p.optiondata_day,filename)
-        price=[]
+        #price=[]
         # if Flag and os.path.isfile(fname):
         #     old_prices = pd.read_csv(fname)
         #     old_prices.rename(columns={"TIMESTAMP": "Date"})
@@ -124,12 +114,10 @@ def get_year_data(year,Flag=False,Start = date(2018,1,1)):
         def concat_Data(x,dbq,con):
             print(x)
             price_df = get_price_list(dt=x)
-            price.append(price_df)
-            if len(price) > 0:
-                prices = pd.concat(price)
-                prices = filterframe.filtered_frame(prices, Options=True)
-                save_data(dbq, con, prices, tb_DerivativeData, fname, fname_day)
-                implobj = ImpliedVolatility(Dffile=fname_day, DfFlag=True, dbq=dbq, conn=con)
+            if not price_df.empty:
+                price_df = filterframe.filtered_frame(price_df, Options=True)
+                save_data(dbq, con, price_df, tb_DerivativeData, fname, fname_day)
+                implobj = ImpliedVolatility(Dframe=price_df, DfFlag=True, dbq=dbq, conn=con)
                 implobj.getStrike()
             else:
                 print("no data to recieve for ",x)
@@ -176,17 +164,15 @@ def appendData():
     #     else:
     #         print('downloading delta data')
     #         startdate = (startdate.year,startdate.day,startdate.month)
-    latestdate = appendDB.get_latest('latestday_der')
-    if latestdate !=0 :latestdate=datetime.strptime(latestdate,"%d-%b-%Y") # date from where we need to download
-
-    print(latestdate)
+    latestdate = getlatestDerivative()
+    if latestdate !=0 :latestdate=datetime.strptime(latestdate,"%d-%b-%Y")  # date from where we need to download
 
     get_year_data(now.year,True,latestdate)
 
 
 years_series=pd.Series([2018])
 if __name__ == '__main__':
-    years_series.apply(get_year_data)
+    #years_series.apply(get_year_data)
     appendData()
 
 

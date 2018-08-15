@@ -12,11 +12,13 @@ from optionvaluecalculation.OptionChain import OIMAXPAIN
 from optionvaluecalculation.utility import getStrikes
 from utility.dbutilities.dbproperties import sqlmokshtechdb
 from utility.dbutilities.dbqueries import *
+# from utility import parrallelize
+
 class ImpliedVolatility(object):
     """"""
-    def __init__(self,conn,dbq,symbol="NIFTY",Dffile='abc.csv',DfFlag=False):
+    def __init__(self,conn,dbq,symbol="NIFTY",Dframe=pd.DataFrame(),DfFlag=False):
         self.DfFlag = DfFlag
-        self.Dffile = Dffile
+        self.Dframe = Dframe
         self.Symbol = symbol
         self.striklist=[]
         self.dbq = dbq
@@ -29,13 +31,11 @@ class ImpliedVolatility(object):
         :return: Dataframe of sybol
         """
         if self.DfFlag:
-            Df = pd.read_csv(self.Dffile)
+            Df = self.Dframe
         else:
-            optionChainData.appendData()  # get the Latest data.
-            # currentFile = 'prices_2018_5.csv' #optionChainData.get_OptionFile(True) # Get current month Option Data File.
-            # lastDate = getstart.get_date(currentFile,Options=True)
-            # print(lastDate)
-            currentFile = os.path.join(p.optiondata,"prices_2018_7.csv")
+            # optionChainData.appendData()  # get the Latest data.
+            currentFile = optionChainData.get_OptionFile(True) # Get current month Option Data File.
+            lastDate = getlatestDerivative()#getstart.get_date(currentFile,Options=True)
             Df = pd.read_csv(currentFile)
         return Df
 
@@ -55,19 +55,23 @@ class ImpliedVolatility(object):
         else:
             self.striklist_DF.to_csv(OptionsIV, header=True)
         try:
-            self.con = self.dbq.df_sql(self.striklist_DF,tb_MaxpainIV,self.con)
-        except Exception as e:
-            print("IMP Vol 4 ",e)
+        #     self.con = self.dbq.dbqueriesdf_sql(self.striklist_DF,tb_MaxpainIV,self.con)
+        # except Exception as e:
+        #     print("IMP Vol 4 ",e)
             try:
+                print('retry2')
                 self.striklist_DF.to_csv(OptionsIV_temp, mode='a', header=False)
-                self.con = self.dbq.csv_sql(OptionsIV_temp,tb_MaxpainIV,self.con)
+                self.con = convert(OptionsIV_temp,dbpath=dbp.sqlmokshtechdb,table=tb_MaxpainIV,conn=self.con)
+                    # self.dbq.csv_sql(OptionsIV_temp,tb_MaxpainIV,self.con)
             except Exception as e:
                 print("IMP Vol 5 ",e)
+        except Exception as e:
+            print("IMP Vol 6", e)
 
 
-    def getSymbolStrike(self,symbol="NIFTY",Df=pd.DataFrame(),x=0):
+    def getSymbolStrike(self,symbol,Df):
         print(symbol)
-        def getDateStrike(i,dbq,con):
+        def getDateStrike(i,dbq,con,x=0):
             strlist = []
             temp_Close = Df_F.loc[Df_F[date] == i][close].tolist()[x]
             exp_date = Df_F.loc[Df_F[close] == temp_Close]['EXPIRY_DT'].tolist()[0]
@@ -152,10 +156,17 @@ class ImpliedVolatility(object):
         Df_F = Df.loc[mask_F]
         DF_O = Df.loc[mask_O]
         Dates_F = pd.Series(Df.loc[mask_F]['Date'].unique())
+        x_no = [0,1,2,3,4,5,6]
         try:
             dbq = self.dbq
             con = self.con
-            Dates_F.apply(getDateStrike,args=(dbq,con))
+            try:
+                print('x_no',x_no)
+                for j in x_no:
+                    Dates_F.apply(getDateStrike, args=(dbq, con, j))
+            except Exception as e:
+                print("error Implied_Volatility2 ",e , j, x_no)
+
         except IndexError as e:
             pass
             #log.debug(e)
@@ -164,23 +175,13 @@ class ImpliedVolatility(object):
 
     def getStrike(self):
         Df = self.load_Data()
-        symbols = Df['SYMBOL'].unique()
-        # symbols=['ARVIND','NIFTY',
-        #              'BANKNIFTY',
-        #              'NIFTYCPSE',
-        #              ]
-        # symbols = pd.Series(symbols)
-        x_no = [0,1,2,3,4,5,6]
+        symbols = pd.Series(Df['SYMBOL'].unique())
+
         try:
-            #a = list(map(lambda x:symbols.apply(self.getSymbolStrike,args=(Df=Df,x=x,)),x_no))
-            for i in symbols:
-                try:
-                    for j in x_no:
-                        self.getSymbolStrike(symbol=i,Df=Df,x=j)
-                except Exception as e:
-                    print("error Implied_Volatility2 ",e ,i, j, x_no)
+            #parrallelize.parallelize_dataframe(5,symbols,self.getSymbolStrike())
+            symbols.apply(self.getSymbolStrike,args=(Df,))
         except Exception as e:
-            print("error Implied_Volatility3 ",e,i,x_no)
+            print("error Implied_Volatility3 ",e)
 
 if __name__ == '__main__':
     try:

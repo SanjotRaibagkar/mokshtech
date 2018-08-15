@@ -1,8 +1,13 @@
 from nsetools import Nse
 import pandas as pd
 from property import*
+from utility.dbutilities.dbqueries import getlatestDerivative
+
+des_file = symbollist
+
+
+
 def  getstockList():
-    des_file = symbollist
     nse = Nse()
     all_stock_code = nse.get_stock_codes(cached=True)
     all_stock_codes = pd.DataFrame(list(all_stock_code.items()),columns=["SYMBOL","NAME OF COMPANY"])
@@ -14,6 +19,15 @@ def  getstockList():
     all_stock_codes['IDX']=False
     return all_stock_codes
 
-def get_idxlist():
 
-    all_stock_codes.to_csv(des_file)
+def get_idxlist():
+    getstockList().to_csv(des_file)
+
+
+def getindexlist():
+    lastuploaddate = getlatestDerivative()
+    print(lastuploaddate)
+
+
+getindexlist()
+

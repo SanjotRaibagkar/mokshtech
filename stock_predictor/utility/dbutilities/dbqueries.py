@@ -44,7 +44,7 @@ class db_queries(object):
         print("Opened database successfully")
         return conn
 
-    def create_connection(self,db_file=dbp.database):
+    def create_connection(self,db_file=dbp.sqlmokshtechdb):
         """ create a database connection to a SQLite database """
         try:
             conn = sqlite3.connect(db_file)
@@ -81,9 +81,10 @@ class db_queries(object):
     def csv_sql(self,table,csvfile,con):
         try:
             con = convert(csvfile,dbpath=self.database,table=table,conn=con)
+            con.commit()
         except Exception as e:
             import stack_trace
-            print(stack_trace,e)
+            print('dbqueries 6',stack_trace,e)
         finally:
             return con
 
@@ -116,12 +117,16 @@ class db_queries(object):
 
 
 
-    def df_sql(self,df,table,con):
+    def dbqueriesdf_sql(self,df,table,con,csvfile='xyz.csv'):
         try:
             df.to_sql(name=table,con=con,if_exists='append',index=False)
             con.commit()
         except Exception as e:
             print(e," dbqueries 3 ")
+            print("retrying")
+            con = convert(table, csvfile, con)
+            con.commit()
+            print("retry succeed")
         finally:
             return con
 
@@ -148,6 +153,17 @@ def getlatestDerivative():
         except Exception as e:
             print(e)
 
+def getlatestStockDate():
 
+    db = os.path.join(p.sqldb, 'mokshtechdatabase.db')
+    dbqo = db_queries()
+    query = dbp.min_max_symbol_date_query
+    con = dbqo.create_connection(db_file=db)
+    cur = con.cursor()
+    rows = cur.execute(query)
+    rows = rows.fetchall()
+    return rows
 
+if __name__ == '__main__':
+    getlatestStockDate()
 # uploadStockData.upload_OptionsData()

@@ -1,15 +1,17 @@
-
 # coding: utf-8
 
 # '''This is only for the development purpose. Idea is to fetch data via frontend code and dump in csv.
 #     till the time that code is ready we will use this. Once frontend gets ready we will retire c
+
 import nsepy
 import datetime
 from datetime import date
-import property
+import property as p
 from utility import getstart as gs
 from utility import downloaddata as dw
 from property import *
+from utility.dbutilities.dbqueries import getlatestStockDate
+from utility.parrallelize import parallelize_dataframe
 
 
 def getsymboldata(flag,symbol,begining=False):
@@ -19,6 +21,9 @@ def getsymboldata(flag,symbol,begining=False):
     symbfile=os.path.join(stockdata,symbol+'.csv')
     startdate=gs.get_startdate(symbfile,symbol,flag) # date from where we need to download
     print('startdate',startdate)
+    if startdate is None:
+        startdate = date(p.y,p.m,p.d)
+        print('startdate', startdate)
     datediff = ((date.today()-startdate).seconds)//60
     if datediff == 0: # for days the above statement will give zero so calculate once more
         datediff = ((date.today()-startdate).days)*24*60*60
@@ -32,26 +37,35 @@ def getsymboldata(flag,symbol,begining=False):
 
 
 def run_getsymboldata(begining=False):
-    for d,s,files in os.walk(stockdatadelta):
-        for f in files:
-            fnme = os.path.join(stockdatadelta,f)
-            if not fnme.startswith("symbolList.csv"):
-                os.remove(fnme)
+    # for d,s,files in os.walk(stockdatadelta):
+    #     for f in files:
+    #         fnme = os.path.join(stockdatadelta,f)
+    #         if not fnme.startswith("symbolList.csv"):
+    #             os.remove(fnme)
     try:
+        pd.DataFrame(getlatestStockDate(), columns=['SYMBOLS', 'Date']).to_csv('temp_symboldates.csv')
         if begining:
             remnonin = lambda lst: getsymboldata(False, lst,begining)
+
             list(map(remnonin, remnonind))
         else:
-            ind = lambda lst: getsymboldata(True, lst)
-            list(map(ind, indlist))
-            nonind = lambda lst: getsymboldata(False, lst)
-            list(map(nonind, nonindlist))
-
+            # ind = lambda lst: getsymboldata(True, lst)
+            def ind(x):
+                getsymboldata(True,x)
+            pd.Series(indlist).apply(ind)
+            #list(map(ind, indlist))
+            #nonind = lambda lst: getsymboldata(False, lst)
+            def nonind(x):
+                getsymboldata(False,x)
+            nonindlist.apply(nonind)
+            #parallelize_dataframe(2, nonindlist, nonind)
 
     except Exception as e:
-        print(e)
+        print('run_getsymboldata',e)
+        import traceback
+        print(traceback.extract_stack())
 
 
 
 if __name__ == '__main__':
-    run_getsymboldata(begining=True)
+    run_getsymboldata()

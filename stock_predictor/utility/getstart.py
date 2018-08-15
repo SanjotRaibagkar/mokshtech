@@ -17,13 +17,13 @@ stockfoldpath=p.stockdata
 def get_date(symbfile,Options):
 
     with open(symbfile) as f:
-        # a = f.readlines()
+        a = f.readlines()
         try:
             a = pd.read_csv(symbfile)['Date'].dropna().unique()
         except Exception as e:
             a = pd.read_csv(symbfile)['TIMESTAMP'].dropna().unique()
         if Options:
-            d = getlatestDerivative()# a[-1]
+            d =  a[-1]
         elif len(a) < 2:
             print(symbfile, 'file is empty')
             d = start
@@ -37,6 +37,7 @@ def get_date(symbfile,Options):
             d = start
     return d
 
+
 def get_startdate(symbfile,symbol='NIFTY',flag=True, Options=False):
     '''
 
@@ -46,9 +47,21 @@ def get_startdate(symbfile,symbol='NIFTY',flag=True, Options=False):
     :return: 1. If file exist than return date in the last row
              2. Else date from where we need to download
     '''
-    if os.path.isfile(symbfile):
-        d=get_date(symbfile,Options)
-        return(d)
+
+
+    if os.path.isfile('temp_symboldates.csv') and Options == False:
+        try:
+            symboldatelist = pd.read_csv('temp_symboldates.csv')
+            sdate = symboldatelist.loc[symboldatelist['SYMBOLS'] == symbol]['Date'].unique()[0]
+            if p.dataunit == 1440:
+                y, m, n = str(sdate).split("-")
+                d = date(int(y), int(m), int(n))
+                d = d + datetime.timedelta(minutes=1440)
+                return d
+        except Exception as e:
+            print(e)
+    elif os.path.isfile(symbfile):
+        return (get_date(symbfile,Options))
     else:
         fd.format_data()  # if the files extension are not csv convert them to csv
         if os.path.isfile(symbfile):

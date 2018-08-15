@@ -58,8 +58,9 @@ def get_tradingDay(startdate,enddate,tradingFlag=True):
         end = datetime.strptime(enddate,"%d-%b-%Y") # date from where we need to download
     else:
         start, end = startdate, enddate
-        print('1',1)
     if tradingFlag:
+
+        print(start,end)
         return pd.Series(pd.DataFrame(nsepy.get_history(symbol='NIFTY',
                 start=start,
                 end=end,
@@ -92,6 +93,7 @@ def get_year_data(year,Flag=False,Start = date(2018,1,1)):
             start += timedelta(days=1)
             continue
         tradingDay=get_tradingDay(start,end)
+        print(tradingDay)
         fname=str("prices_")+str(year)+"_"+str(i)+".csv"
         fname = os.path.join(p.optiondata,fname)
         price=[]
