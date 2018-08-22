@@ -2,17 +2,21 @@ from optionvaluecalculation.utility import extract_table
 import numpy as np
 import pandas as pd
 import itertools
+import os
+import property as p
 
 def get_Data():
-    #df, Spot_Price, strike_price_diff, strikelist, Highlist, Lowlist =
-    # extract_table.extract_table('index', 'NIFTY')
+    df, Spot_Price, strike_price_diff, strikelist, Highlist, Lowlist = \
+    extract_table.extract_table('index', 'NIFTY')
 
-    Spot_Price, strike_price_diff, strikelist, Highlist, Lowlist =\
-        11387.1,50, [11200,11250,11300.0, 11350.0, 11400.0,  11450.0,11500,11550.0],\
-        [11200,11250,11300.0, 11350.0],[ 11400.0, 11450.0,11500,11550.0]
 
-    hardpath = "E:\\Prgs\\Code\\mokshtech-1\\stock_predictor\\optionvaluecalculation\\strategies\\df.csv"
-    df = pd.read_csv(hardpath)  # This file contains strike price,corrosponding call and put trading prices
+    # Spot_Price, strike_price_diff, strikelist, Highlist, Lowlist =\
+    #     11387.1,50, [11200,11250,11300.0, 11350.0, 11400.0,  11450.0,11500,11550.0],\
+    #     [11200,11250,11300.0, 11350.0],[ 11400.0, 11450.0,11500,11550.0]
+    #
+    # df = pd.read_csv(os.path.join(p.strategies_p,'df.csv'))  # This file contains strike price,corrosponding call and put trading prices
+
+    input = pd.read_csv(os.path.join(p.strategies_p,'input.csv'))
     print(strikelist)
     tot_data = len(df)
     df = df.to_dict('record')
@@ -24,7 +28,7 @@ def get_Data():
             df_dict[float(strike_price)] = float(strike_price), float(C_LTP), float(P_LTP)
         else:
             pass
-    return Spot_Price,strikelist, Highlist, Lowlist,df_dict
+    return Spot_Price,strikelist, Highlist, Lowlist,df_dict,input
 
 shares = 1
 
@@ -104,25 +108,29 @@ def get_nearest_strkprice(Spot_Price,Highlist,Lowlist):
 
 
 
-def put_payoff(sT, strike_price, premium):
-    return np.where(sT < strike_price, strike_price - sT, 0) - premium
+# def put_payoff(sT, strike_price, premium):
+#     return np.where(sT < strike_price, strike_price - sT, 0) - premium
 
-def call_payoff(sT,strike_price,premium,shares=1,n=1,short=0):
+def call_payoff(sT,strike_price,df_dict,shares=1,n=1,short=0):
+
+    premium=df_dict[strike_price][1]
+
     if short:
         n = n * -1
         return np.where(sT > strike_price,
                         ((sT - strike_price) - premium) * n * shares,
-                        -premium * n * shares), n
+                        -premium * n * shares)
     else:
         return np.where(sT > strike_price,
                         ((sT - strike_price) - premium) * n * shares,
-                        -premium * n * shares), n
+                        -premium * n * shares)
 
-def put_payoff(sT,strike_price,premium,shares=1,n=1,short=0):
+def put_payoff(sT,strike_price,df_dict,shares=1,n=1,short=0):
+    premium = df_dict[strike_price][2]
     if short:
         n = n * -1
 
-    return (np.where(sT < strike_price, strike_price - sT, 0) - premium) * n,n
+    return (np.where(sT < strike_price, strike_price - sT, 0) - premium) * n
 
 
 def call_atm_short_payoff(sT,strike_price,premium,shares=1,n=1):
@@ -132,7 +140,8 @@ def call_atm_short_payoff(sT,strike_price,premium,shares=1,n=1):
 def get_diag(y, sT, title):
     pycharm = 0
     if pycharm:
-        return 0
+        pass
+        # return 0
     else:
         from matplotlib import pyplot as plt
         # Create a plot using matplotlib
@@ -152,7 +161,7 @@ def get_diag(y, sT, title):
             plt.grid(True)
             plt.axis('tight')
             plt.show()
-            return fig
+            # return fig
         except Exception as e:
             print(e)
 
@@ -171,12 +180,12 @@ def exec_strategy(comb,test,payoff_df):
     return payoff_df
 
 
-def Long_call_butterfly(sT,Spot_Price,strikelist, Highlist, Lowlist,df_dict,payoff_df,short = False):
-
+def Long_call_butterfly(xsT,Spot_Price,strikelist, Highlist, Lowlist,df_dict,payoff_df,short = False):
+    input=input
     S0 = get_nearest_strkprice(Spot_Price,Highlist,Lowlist)
     a = [Lowlist,[S0],Highlist]
     comb = get_comb(a)
-    sT = np.arange(0, 2 * S0, 5)
+    sT = xsT #np.arange(0, 2 * S0, 5)
 
     def test(x):
         k1 = x[0]
@@ -187,7 +196,7 @@ def Long_call_butterfly(sT,Spot_Price,strikelist, Highlist, Lowlist,df_dict,payo
         c3 = df_dict[k3][1]
         sum = 0
 
-        strgy = "long {0},2* short{1} , long {2}".format(k1,k2,k3)
+        strgy = "long {0} @ {1},2* short{2} @ {3} , long {4} @ {5}".format(k1,c1,k2,c2,k3,c3)
         # Stock Price at expiration of the Call
 
         # Payoff from the Lower Strike ITM Long Call Option
@@ -224,37 +233,49 @@ def Long_call_butterfly(sT,Spot_Price,strikelist, Highlist, Lowlist,df_dict,payo
     return exec_strategy(comb,test,payoff_df)
 
 
-def iron_condor(sT,Spot_Price,strikelist, Highlist, Lowlist,df_dict,payoff_df):
-    S0 = get_nearest_strkprice(Spot_Price, Highlist, Lowlist)
-    # a = [Lowlist, [S0], Highlist]
-    a = [Highlist, Lowlist, Lowlist, Highlist]
+def iron_condor(sT, Spot_Price, A, H, L, df_dict, input, payoff_df):
+    input['short'] = input['short'].replace('S',1)
+    input['short'] = input['short'].replace('B', -1)
+
+    sum = pd.Series(input['short'] * input['no']).sum()
+    validate_sum(sum)
+    input['short'] = input['short'].replace(-1, 0)
+
+    strategy = input['trade'].tolist()
+    short = input['short']
+    no = input['no']
+
+
+    b=input['range'].tolist()
+    # a = a.append(list(map(lambda x:eval(x),input['range'].tolist())))
+    a=[]
+    for i in range(len(b)):
+        a.append(eval(b[i]))
     comb = get_comb(a)
-    sT = np.arange(0, 2 * S0, 5)
 
     def test(x):
-        k1 = x[0]
-        k2 = x[1]
-        k3 = x[2]
-        k4 = x[3]
+        strgy = ''
+        y = 0
+        for i in range(0,len(x)):
+            if strategy[i] == 'P':
+                trade = 'PUT'
+                prem = df_dict[x[i]][1]
+                y += put_payoff(sT, x[i], df_dict, short=short[i], n=no[i])
+            else:
+                trade = 'CALL'
+                y += call_payoff(sT, x[i], df_dict, short=short[i], n=no[i])
 
-        p1 = df_dict[k1][2]
-        c2 = df_dict[k2][1]
-        p3 = df_dict[k3][2]
-        c4 = df_dict[k4][1]
-        strgy = "Sell Put {0} ,Sell Call {1}, Buy  Put {2}, Buy Call {3}".\
-            format(k1,k2,k3,k4)
-        sum = 0
-        y1, cnt1 = call_payoff(sT,k1,p1)
-        y2, cnt2 = call_payoff(sT,k2,c2,short=1)
-        y3, cnt3 = put_payoff(sT,k3,p3)
-        y4, cnt4 =  put_payoff(sT,k4,c4,short=1)
+            if short[i]:
+                strgy += ' Sell {0} {1} @ {2}'.format(trade,x[i],prem)
+            else:
+                strgy += ' Buy {0} {1} @ {2}'.format(trade,x[i], prem)
 
-        payoff = y1 + y2 + y3 + y4
-        title = 'iron condor '+strgy
+
+        payoff = pd.Series([y]).sum()
+
+        title = 'iron condor '+ strgy
         diag = get_diag(payoff,sT,title)
 
-        sum = sum + cnt1 + cnt2 + cnt3 + cnt4
-        validate_sum(sum)
 
         maxindex, max_profit, minindex, max_loss, min_loss, risk_reward_ratio = calculate_max_reward(payoff)
 
@@ -275,8 +296,8 @@ def get_strategy_payoff(i,sT,Spot_Price,strikelist, Highlist, Lowlist,df_dict,pa
 def get_maxriskrwward(*args):
 
 
-    Spot_Price, strikelist, Highlist, Lowlist, df_dict = get_Data()
-    put_exp_range = 0.2
+    Spot_Price, strikelist, Highlist, Lowlist, df_dict,input = get_Data()
+    put_exp_range = 0.5
 
     sT = np.arange((1-put_exp_range)*Spot_Price,(1+put_exp_range)*Spot_Price,1)
 
@@ -304,18 +325,17 @@ def get_maxriskrwward(*args):
         payoff_list=[]
         for i in args:
             payoff_list.append(eval(i)(sT,Spot_Price,strikelist, Highlist, Lowlist,df_dict,payoff_df))
-            print(payoff_list)
             payoff_df = reduce_df(pd.concat(payoff_list))
             print(payoff_df)
 
     else:
         print('no args')
-        payoff_long_call_butterfly = Long_call_butterfly(sT,Spot_Price,strikelist, Highlist, Lowlist,df_dict,payoff_df)
-        payoff_iron_condor = iron_condor(sT,Spot_Price,strikelist, Highlist, Lowlist,df_dict,payoff_df)
-
-        # payoff_df = reduce_df(pd.concat([payoff_df_a,payoff_df_b]))
-        payoff_df = pd.concat([payoff_long_call_butterfly,payoff_iron_condor])
+        #payoff_long_call_butterfly = Long_call_butterfly(sT,Spot_Price,strikelist, Highlist, Lowlist,df_dict,payoff_df)
+        payoff_iron_condor = iron_condor(sT,Spot_Price,strikelist, Highlist, Lowlist,df_dict,input,payoff_df)
+        payoff_df = reduce_df(payoff_iron_condor) #pd.concat([payoff_df_a,payoff_df_b]))
+        # payoff_df = pd.concat([payoff_long_call_butterfly,payoff_iron_condor])
         print(payoff_df)
+
 
     # payoff_list =[]
     # for i in strikelist:

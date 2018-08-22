@@ -7,9 +7,9 @@ def getStrikes(CloseValue,strikeList):
     CloseValue = float(CloseValue)
     diff = abs(int(float(strikeList[0])) - int(float(strikeList[1])))
     Strike_High = CloseValue + (diff - (CloseValue % diff))  # Get smallest no from larger no then Close
-    Strike_High = Strike_High[:-1]
+    # Strike_High = Strike_High[:-1]
     Strike_Low = CloseValue + -(CloseValue % diff)  # Get largest no from smaller then Close
-    Strike_Low = Strike_Low[1:]
+    # Strike_Low = Strike_Low[1:]
     return diff,Strike_High,Strike_Low
 
 
@@ -24,7 +24,7 @@ def get_Strikelist(strike_price_diff,Strike_High, Strike_Low,strike_price_start,
     :param no_of_strikes: total strikes above/below spot prices
     :return: list of strike prices around spot price
     """
-    x, y = Strike_Low, Strike_High
+    y, x = Strike_Low, Strike_High
     lowlist, highList = [], []
     i, j = 0, 0
 

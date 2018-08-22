@@ -83,7 +83,7 @@ def extract_table(strSymbol,sym,expiry='-'):
     # new_table = new_table.to_dict(orient='records')
     # print(new_table[2200.00])
     fname=sym+'.csv'
-    new_table.to_csv(fname)
+    new_table.to_csv(fname,index=False)
     return new_table,spot_price,strike_price_diff,strikelist,Highlist,Lowlist
 
 if __name__ == '__main__':

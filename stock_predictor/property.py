@@ -37,6 +37,9 @@ optiondata = os.path.join(dbpath,'optiondata')
 optiondata_day = os.path.join(dbpath,'optiondata_day')
 symbollist = os.path.join(dbpath,'symbollist.csv')
 
+strategies_p = os.path.join(basepath,'optionvaluecalculation','strategies')
+
+
 sqldb = os.path.join(dbpath,'sqlite')
 #stockdata=os.path.join(dbpath,'stockdata_1')
 

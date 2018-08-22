@@ -1,2 +1,0 @@
-Row_Num,Symbol,Spot_Price,Long_put_StPr,Long_put_prm,Short_put_StPr,Short_put_prm,Long_call_StPr,Long_call_prm,put_exp_range,Short_call_StPr,Short_call_prm
-1,PNB,117.05,110,8.3,120,10,110,16.05,0.2,90,18
