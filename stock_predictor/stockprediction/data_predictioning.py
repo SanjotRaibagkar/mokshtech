@@ -46,9 +46,10 @@ class pv_visualise(object):
         df = DF.iloc[:, 0:1].copy()
 
         df = df.rename(columns={'Close': 'Historic  Price'})
-        #target_testDF['y_test'] = y_test
-        #result = pd.concat([df, target_testDF], axis=1)
-        #result = result.rename(columns={'Close': 'Real test  Price'})
+        target_testDF['y_test'] = y_test
+        result = pd.concat([df, target_testDF], axis=1)
+        result = result.rename(columns={'Close': 'Real test  Price'})
+        print(self.flag)
         if not self.flag:
             #Get last n dates
             dates = DF.tail(n=self.predict_days).index

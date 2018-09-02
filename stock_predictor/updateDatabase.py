@@ -21,6 +21,7 @@ from optionvaluecalculation.OptionChain import nseoptionchain
 
 years_series=pd.Series([2018])
 if __name__ == '__main__':
-    nseoptionchain.appendData()
+    # nseoptionchain.appendData()
     getsymboldata.run_getsymboldata()
+
 

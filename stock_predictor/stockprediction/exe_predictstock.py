@@ -18,7 +18,7 @@ def predictstock(symbol):
         t = pf.pre_for(def_features, int(x), symbol)
         d2 = dict((k, t.pf(v, skip_days)) for k, v in data.items())  # v is dataframe
 
-    # list(map(funcseries, b.predict_days))
+    list(map(funcseries, b.predict_days))
 
 
 def exe_predictstock():
