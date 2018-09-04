@@ -22,7 +22,10 @@ def save_data(DF,file,tempfile,flag):
         dbpath = dbp.sqlmokshtechdb
         con = dbq.create_connection(db_file=dbpath)
         con = convert(tempfile, dbpath=dbpath, table=stable, conn=con)
-        DF.to_csv(file, mode='a',index='Date')
+        if os.path.exists(file):
+            DF.to_csv(file, mode='a',index='Date',header=False)
+        else:
+            DF.to_csv(file, mode='a',index='Date',header=True)
         print('data saved')
     except Exception as e:
         print("downdata 4 ", e)

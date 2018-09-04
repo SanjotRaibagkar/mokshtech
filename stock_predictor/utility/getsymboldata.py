@@ -20,7 +20,6 @@ def getsymboldata(flag,symbol,begining=False):
     till the time that code is ready we will use this. Once frontend gets ready we will retire code'''
     symbfile=os.path.join(stockdata,symbol+'.csv')
     startdate=gs.get_startdate(symbfile,symbol,flag) # date from where we need to download
-    print('startdate',startdate)
     if startdate is None:
         startdate = date(p.y,p.m,p.d)
         print('startdate', startdate)
