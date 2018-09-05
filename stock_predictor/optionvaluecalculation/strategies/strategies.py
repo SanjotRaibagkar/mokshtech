@@ -10,6 +10,7 @@ from utility.parrallelize import parallelize
 
 inputcsv = os.path.join(p.strategies_p, 'input.csv')
 userdataip = os.path.join(p.strategies_p, 'userdataip.csv')
+preDefinedStrategies = os.path.join(p.strategies_p,'preDefinedStrategies')
 
 shares = 1
 
@@ -40,7 +41,7 @@ def get_Data(strSymbol,sym,expiry='-'):
 
     # df = pd.read_csv(os.path.join(p.strategies_p,'df.csv'))  # This file contains strike price,corrosponding call and put trading prices
 
-    input = pd.read_csv(os.path.join(p.strategies_p, inputcsv))
+
     tot_data = len(df)
     df = df.to_dict('record')
     df_dict = {}
@@ -64,7 +65,7 @@ def get_Data(strSymbol,sym,expiry='-'):
                 print("error", e, "on line", i)
             for i in pop_list:
                 print(i)
-    return Spot_Price, strikelist, Highlist, Lowlist, df_dict, input
+    return Spot_Price, strikelist, Highlist, Lowlist, df_dict
 
 
 
@@ -181,7 +182,7 @@ def call_atm_short_payoff(sT, strike_price, premium, shares=1, n=1):
 
 
 def get_diag(y, sT, title):
-    pycharm = 0
+    pycharm = 1
     if pycharm:
         pass
         # return 0
@@ -281,6 +282,7 @@ def Long_call_butterfly(xsT, Spot_Price, strikelist, Highlist, Lowlist, df_dict,
 
 
 def multileg(sT, Spot_Price, X, H, L, df_dict, input, payoff_df):
+    input =  pd.read_csv(input)
     input['short'] = input['short'].replace('S', 1)
     input['short'] = input['short'].replace('B', -1)
 
@@ -352,7 +354,7 @@ def get_maxriskrwward(row):
     :return:
     '''
     strSymbol, sym, expiry, args = row[0],row[1],row[2],row[4]
-    Spot_Price, strikelist, Highlist, Lowlist, df_dict, input = get_Data(strSymbol,sym,expiry='-')
+    Spot_Price, strikelist, Highlist, Lowlist, df_dict = get_Data(strSymbol,sym,expiry='-')
     put_exp_range = 0.5
     sT = np.arange((1 - put_exp_range) * Spot_Price, (1 + put_exp_range) * Spot_Price, 1)
     # def getPayoffALL(sT,strike_price,C_LTP,P_LTP):
@@ -376,15 +378,23 @@ def get_maxriskrwward(row):
 
     if isinstance(args,float):
         print('no args')
+        input = os.path.join(p.strategies_p,'input.csv')
+
         # payoff_long_call_butterfly = Long_call_butterfly(sT,Spot_Price,strikelist, Highlist, Lowlist,df_dict,payoff_df)
-        payoff_iron_condor = multileg(sT, Spot_Price, strikelist, Highlist, Lowlist, df_dict, input, payoff_df)
-        payoff_df = reduce_df(payoff_iron_condor)  # pd.concat([payoff_df_a,payoff_df_b]))
+        payoff_multileg = multileg(sT, Spot_Price, strikelist, Highlist, Lowlist, df_dict, input, payoff_df)
+        payoff_df = reduce_df(payoff_multileg)  # pd.concat([payoff_df_a,payoff_df_b]))
         # payoff_df = pd.concat([payoff_long_call_butterfly,payoff_iron_condor])
         print(payoff_df)
     else:
         payoff_list = []
-        for i in args:
-            payoff_list.append(eval(i)(sT, Spot_Price, strikelist, Highlist, Lowlist, df_dict, payoff_df))
+        # args = tuple(args)
+        if args in ['ALL', 'Nuetral', 'Bullish', 'Bearish']:
+            pass
+        else:
+            # for i in args:
+            i=args+'.csv'
+            input = os.path.join(preDefinedStrategies,i)
+            payoff_list.append(multileg(sT, Spot_Price, strikelist, Highlist, Lowlist, df_dict, input, payoff_df))
             payoff_df = reduce_df(pd.concat(payoff_list))
             print(payoff_df)
 

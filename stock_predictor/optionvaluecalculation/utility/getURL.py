@@ -9,14 +9,14 @@ def getURL(strSymbol,sym,expiry='-'):
     :return: URL
     """
     if expiry != '-':
-        if len(str(expiry).split('-')[-1])==4:
+        if len(str(expiry).split('-')[-1]) == 4:
             expiry = datetime.datetime.strptime(expiry,"%d-%m-%Y").strftime("%d%b%Y").upper()
-        elif len(str(expiry).split('-')[0])==4:
+        elif len(str(expiry).split('-')[0]) == 4:
             expiry = datetime.datetime.strptime(expiry, "%Y-%m-%d").strftime("%d%b%Y").upper()
-        elif len(str(expiry).split('-')[-1])==2:
+        elif len(str(expiry).split('-')[-1]) == 2:
             expiry = datetime.datetime.strptime(expiry,"%d-%m-%y").strftime("%d%b%Y").upper()
         elif len(expiry) == 9:
-            expiry=expiry.upper()
+            expiry = expiry.upper()
 
     if (strSymbol == "index"):
         if (sym == "select"):
