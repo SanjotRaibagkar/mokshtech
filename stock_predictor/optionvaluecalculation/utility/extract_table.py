@@ -1,3 +1,4 @@
+import os
 import requests
 import pandas as pd
 import time
@@ -5,9 +6,20 @@ import time
 from optionvaluecalculation.utility import getURL
 from optionvaluecalculation.utility import getStrikes
 from bs4 import BeautifulSoup
+import property as p
 from optionvaluecalculation.utility.getStrikes import get_Strikelist
 
+
+totalstrikes=3
+
 def extract_table(strSymbol,sym,expiry='-'):
+    '''
+
+    :param strSymbol: index or STK
+    :param sym: symbol
+    :param expiry: expiry date  : ex: 27SEP2018
+    :return:
+    '''
     # print('0',time.time())
 
     Base_url = getURL.getURL(strSymbol,sym)
@@ -76,13 +88,9 @@ def extract_table(strSymbol,sym,expiry='-'):
 
     # print('4',time.time())
     strike_price_diff,Strike_High,Strike_Low = getStrikes.getStrikes(spot_price,strike_list)
-    strikelist,Highlist,Lowlist = (getStrikes.get_Strikelist(strike_price_diff, Strike_High, Strike_Low,strike_price_start, strike_price_end,5))
-    #new_table = new_table[new_table.index.isin(strikelist)]
+    strikelist,Highlist,Lowlist = (getStrikes.get_Strikelist(strike_price_diff, Strike_High, Strike_Low,strike_price_start, strike_price_end,totalstrikes))
     new_table.index.astype('float')
-    # print(new_table.index.astype)
-    # new_table = new_table.to_dict(orient='records')
-    # print(new_table[2200.00])
-    fname=sym+'.csv'
+    fname = os.path.join(p.strategies_p, sym+str(expiry)+'.csv')
     new_table.to_csv(fname,index=False)
     return new_table,spot_price,strike_price_diff,strikelist,Highlist,Lowlist
 
