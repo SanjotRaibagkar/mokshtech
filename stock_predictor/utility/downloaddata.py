@@ -62,7 +62,8 @@ def down_data(symbfile,symbol='NIFTY',flag=True,startdate=startdate,enddate=date
             delsymfile = symbol + '.csv'
             delsymfilepath = os.path.join(stockdatadelta, delsymfile)
             print(delsymfilepath)
-            save_data(dataset_train,symbfile,delsymfilepath,flag)
+            dataset_train.to_csv(symbfile, mode='a', index='Date', header=False)
+            #save_data(dataset_train,symbfile,delsymfilepath,flag)
             print(symbol,' done')
         else:
             print(symbol,startdate,' not sufficient data')
