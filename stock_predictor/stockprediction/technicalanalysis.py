@@ -29,6 +29,7 @@ class ta(lcsv.Load_csv):
 
         """load 'Date','Close', 'Volume' data from databse and return dataframe
         """
+        print(__name__,"loadcsv")
         self.loadfeatures()  # Load features data
         a = ['Date']
         a.extend(operator.concat(self.label, self.misc))
@@ -39,12 +40,14 @@ class ta(lcsv.Load_csv):
 
         self.def_features = a
         self.dataset = self.LoadData(self.filename).loc[:, a]
+        print("laod CSV1",self.dataset, self.dataset['Date'])
         self.dataset['Date'] = pd.to_datetime(self.dataset['Date'])
         self.dataset = self.dataset.fillna(self.dataset.mean())
 
         return self.dataset
 
     def loadfeaturesdata(self, x):
+        print(__name__,"loadfeaturesdata")
         """load features detailed data from databse
         Row 1 will be index"""
         self.featuresdata = self.LoadfeaData(featuresdata)
@@ -53,6 +56,7 @@ class ta(lcsv.Load_csv):
         return list(self.featuresdata.loc[x, 1:])
 
     def ti_Combinations(self):
+        print(__name__,"ti_Combinations")
         """takes input as list of list and  gives output as comninations """
         self.paneldict = {}
 
@@ -97,6 +101,7 @@ class ta(lcsv.Load_csv):
             print('e2 technicalanalysis', e)
 
     def loadfeatures(self):
+        print(__name__,"loadfeatures")
         """load feature label data from databse
         """
         self.featurestilist = []
@@ -106,15 +111,18 @@ class ta(lcsv.Load_csv):
         self.tilist = dir(talib)
         self.featuredict = {}
         self.tidict = {}
+        print(__name__, "loadfeatures   1")
         self.features = self.LoadfeaData(featurescsv)
+        print(__name__, "loadfeatures 2")
 
         def func(value, args):
-
+            print("Value in fund ind", value)
+            print("arg in fund ind", args)
             if str(value).find("-") > -1:  # tocheck if range is given
                 a, b = value.split("-")
                 a = int(a)
                 b = int(b)
-
+                print(__name__, "loadfeatures 3")
                 self.featuredict[args].extend(list(range(a, b)))  # if range is given then replace it by list
                 self.tidict[args].append(list(range(a, b)))
 
@@ -122,6 +130,7 @@ class ta(lcsv.Load_csv):
                 try:
                     var = str(args) + '-' + str(int(value))  # togenerate name like MA-1,MA-2
                     args_df = pd.Series(self.loadfeaturesdata(var)).dropna().astype('int64').tolist()
+                    print(__name__, "loadfeatures 4")
                     self.featuredict[args].extend(args_df)
                     self.tidict[args].append(args_df)
                 except Exception as e:
@@ -133,11 +142,12 @@ class ta(lcsv.Load_csv):
             rowdf = rowdf.dropna()
 
             if ti in self.tilist:  # If  first element of each row of features is in tilist then they are technical indicators
+                print("tech ind", ti)
                 self.featuredict[ti] = []
                 self.tidict[ti] = []
                 self.featurestilist.append(ti)
-
                 rowdf.apply(func, args=(ti,))  # Vectorize function over each element
+
 
             elif ti == 'label':
                 self.label.append(row[1])
@@ -158,7 +168,9 @@ class ta(lcsv.Load_csv):
 
                 # vectorize approach to speed up process
 
+        print(__name__, "loadfeatures 5")
         self.features.apply(funr, axis=1)
+        print(__name__, "loadfeatures 6")
 
         # return(self.featurestilist,self.label,self.misc)
 
@@ -193,14 +205,19 @@ class ta(lcsv.Load_csv):
         self.dataset['BBs'] = upper - lower
 
     def get_technical_indi(self):
-
+        print("get_technical_indi   1")
         self.tdf = self.LoadData(self.filename).loc[:, [self.get_label()]]
+        print("get_technical_indi   2")
         for i in self.featurestilist:
+            print("get_technical_indi   1.1",i)
             if i == 'MA':
+                print("get_technical_indi   3")
                 self.get_MA(self.get_label())
             if i == 'RSI':
+                print("get_technical_indi   4")
                 self.get_RSI(self.get_label())
             if i == 'BBANDS':
+                print("get_technical_indi   5")
                 self.get_BBANDS(self.get_label())
 
     def get_return(self):
@@ -216,8 +233,13 @@ class ta(lcsv.Load_csv):
 
     def get_panel_data(self):
         self.loadcsv()  # Update and Load Symbol Data
+        print("get_panel_data 1")
         self.get_technical_indi()  # Get technical indicators for features in features data
+        print("get_panel_data 2")
         self.get_label()  # Get label
+        print("get_panel_data 3")
         self.get_otherindi()  # Get other indicators which do not requires no of days parameters
+        print("get_panel_data 4")
         self.ti_Combinations()  # For indicators which requires combination, create different dataset
+        print("get_panel_data 5")
         return self.paneldict  # return dictionary of dataframes with key as combination of MA

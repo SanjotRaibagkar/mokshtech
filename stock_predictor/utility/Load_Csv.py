@@ -27,6 +27,7 @@ class Load_csv(object):
     It will skip any outliers in between.
     To handle this need select statement from database.'''
     def LoadData(self,filename):
+        print(__name__,"LoadData", filename)
         data=pd.read_csv(filename, error_bad_lines=False)
         return data
     

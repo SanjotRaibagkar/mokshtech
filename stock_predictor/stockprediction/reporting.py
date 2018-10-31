@@ -110,6 +110,7 @@ def mod_report(old=reportpath,new=mod_reportpath):
         print('reading last run file')
         df = pd.read_csv(techrep)   # if technical file for the current day do not exist then read last run technical file.
     df=df.drop_duplicates()
+    print(__name__,"mod_report1",df)
     mod_df=df.loc[df.groupby(['symbol', 'Days'])['RMSE'].idxmin()]
     mod_df = df.sort_values("RMSE")   #Sort DF with least values.
     mod_df.to_csv(new,index=False)

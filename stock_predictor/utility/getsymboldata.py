@@ -20,17 +20,23 @@ def getsymboldata(flag,symbol,begining=False):
     till the time that code is ready we will use this. Once frontend gets ready we will retire code'''
     symbfile = os.path.join(stockdata,symbol+'.csv')
     startdate = gs.get_startdate(symbfile,symbol,flag) # date from where we need to download
+    print(__name__,"getsymboldata1",startdate)
     if begining: startdate = None
     if startdate is None:
         startdate = date(p.y,p.m,p.d)
         print('startdate', startdate)
+    print(__name__, "getsymboldata2", date.today())
+    print(__name__, "getsymboldata3", startdate)
+    print(__name__, "getsymboldata3", (date.today()-startdate).seconds)
     datediff = ((date.today()-startdate).seconds)//60
+    print("Data diff is ",datediff)
     if datediff == 0: # for days the above statement will give zero so calculate once more
         datediff = ((date.today()-startdate).days)*24*60*60
+    print("Data diff is1 ", datediff)
     if datediff == 0:
         print('updated data present')
-    elif 1 < datediff < 1440 :
-        pass                # Place holder for 5 mins and 1 min data download code.
+    #elif 1 < datediff < 1440 :
+     #   pass                # Place holder for 5 mins and 1 min data download code.
     else:
         print('downloading delta data')
         dw.down_data(symbfile,symbol,flag,startdate=startdate,headerflag=False)

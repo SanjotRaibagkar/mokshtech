@@ -59,13 +59,16 @@ def funr(row,*predict_days):
         else:
             print(key,' does not exist for',row['symbol'])
     except Exception as e:
+        print(e.with_traceback())
         print('e2',sys.exc_info()[0])
 
 
 
 def final_run(symbol='x',predict_days=1):
      try:
+        print(__name__,"final_run",symbol,predict_days)
         mod_df=fr.mod_report()
+        print(__name__, "final_run1", mod_df)
         mod_df.apply(c_moddict, axis=1)
         fr.create_reportfile(final_reportpath, reportcol)
         warnings.filterwarnings("ignore")
@@ -80,7 +83,7 @@ def final_run(symbol='x',predict_days=1):
         else:
             mod_df.apply(funr, axis=1)
      except Exception as e:
-         print('e3',e)
+         print('e3',e.with_traceback())
 
 if __name__ == '__main__':
     final_run()

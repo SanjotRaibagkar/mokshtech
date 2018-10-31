@@ -22,13 +22,20 @@ def predictstock(symbol):
 
 
 def exe_predictstock():
+    print(__name__,"exe_predictstock1")
     fr.create_reportfile(reportpath, reportcol)
+    print(__name__, "exe_predictstock2")
     warnings.filterwarnings("ignore")
     try:
+        print(__name__, "exe_predictstock3")
         noninddf = pd.Series(nonindlist)
+        print(__name__, "exe_predictstock4")
         indlistdf = pd.Series(indlist)
+        print(__name__, "exe_predictstock5")
         noninddf.apply(predictstock)
+        print(__name__, "exe_predictstock6")
         indlistdf.apply(predictstock)
+        print(__name__, "exe_predictstock1=7")
 
     except Exception as e:
         print(e)

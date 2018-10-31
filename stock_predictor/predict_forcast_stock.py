@@ -42,7 +42,7 @@ if __name__ == '__main__':
                         to run forcast for a symbol without prediction  : run : python <filename> f symbol days
                     ''')
     except Exception as e:
-        print('predict_forcast_stock',e)
+        print('predict_forcast_stock',e.with_traceback())
         print(''' to predict stocks from property : run :           python <filename> p x
             to predict particular symbol : run :                    python <filename> p symbol
             to predict and run forcast : run  :                     python <filename> p x x f x
