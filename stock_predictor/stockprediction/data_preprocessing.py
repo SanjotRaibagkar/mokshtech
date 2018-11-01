@@ -30,7 +30,6 @@ class ml_dpmodels(object):
         # Note length of scaling dataframe should be same otherwise need to use separate scaling objects.
         self.sc = MinMaxScaler(feature_range=(0, 1))
         self.sc_target = MinMaxScaler(feature_range=(0, 1))
-        print("ml_dpmodels",DF)
         DF_scaled = self.sc.fit_transform(DF)  # This is total dataset rows will be 1 to 9
         input_scaled = DF_scaled[:-self.predict_days]       # Row from 1 to 8
         target_scaled = self.sc.fit_transform(target)

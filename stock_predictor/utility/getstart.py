@@ -48,14 +48,14 @@ def get_startdate(symbfile,symbol='NIFTY',flag=True, Options=False):
              2. Else date from where we need to download
     '''
 
-    print(__name__,"get_startdate 1",symbfile)
+
     if os.path.isfile('temp_symboldates.csv') and Options == False:
         try:
-            print(__name__, "get_startdate 1.1", os.path)
+
             symboldatelist = pd.read_csv('temp_symboldates.csv')
-            print(__name__, "get_startdate 1.1", symboldatelist)
+
             sdate = symboldatelist.loc[symboldatelist['SYMBOLS'] == symbol]['Date'].unique()[0]
-            print(__name__, "get_startdate 1.1", sdate)
+
             if p.dataunit == 1440:
                 y, m, n = str(sdate).split("-")
                 d = date(int(y), int(m), int(n))
@@ -64,16 +64,16 @@ def get_startdate(symbfile,symbol='NIFTY',flag=True, Options=False):
         except Exception as e:
             print(e)
     elif os.path.isfile(symbfile):
-        print(__name__, "get_startdate 2", symbfile)
+
         return (get_date(symbfile,Options))
     else:
-        print(__name__, "get_startdate 3", symbfile)
+
         fd.format_data()  # if the files extension are not csv convert them to csv
         if os.path.isfile(symbfile):
             d = get_date(symbfile,Options)
             return (d)
         else:
-            print(__name__, "get_startdate 4", symbfile)
+
             print(symbfile, ' file does not exist')
             print('creating file and downloading data')
             d = start
