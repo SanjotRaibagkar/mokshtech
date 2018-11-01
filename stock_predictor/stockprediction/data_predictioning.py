@@ -47,8 +47,8 @@ class pv_visualise(object):
 
         df = df.rename(columns={'Close': 'Historic  Price'})
         target_testDF['y_test'] = y_test
-        result = pd.concat([df, target_testDF], axis=1)
-        result = result.rename(columns={'Close': 'Real test  Price'})
+        #result = pd.concat([df, target_testDF], axis=1)
+        #result = result.rename(columns={'Close': 'Real test  Price'})
         print(self.flag)
         if not self.flag:
             #Get last n dates
@@ -59,13 +59,13 @@ class pv_visualise(object):
 
         fs_df = pd.DataFrame(index=dates)
         fs_df['forcast_stock_price'] = forcast_target_price.round(2)
-        result = pd.concat([df, fs_df], axis=1)
         print('predict', predicted_stock_price[-1])
         print('ytest', y_test[-1])
         print('forcast', fs_df['forcast_stock_price'][0])
+        #result = pd.concat([df, fs_df], axis=1)
         if not self.flag:
             actual_price = DF.iloc[-self.predict_days:, 0:1].rename(columns={'Close': 'ActualPrice'})
-            result = pd.concat([result, actual_price], axis=1)
+            #result = pd.concat([result, actual_price], axis=1)
             print('actual', actual_price['ActualPrice'][0])
 
 
@@ -90,7 +90,7 @@ class pv_visualise(object):
         width = 18
         height = 10
         try:
-            result.plot(legend=True, title='Stock Price Prediction ' + header, figsize=(width, height))
+            #result.plot(legend=True, title='Stock Price Prediction ' + header, figsize=(width, height))
             plt.grid(color='b', linestyle='--', linewidth=1)
             plt.show()
 
