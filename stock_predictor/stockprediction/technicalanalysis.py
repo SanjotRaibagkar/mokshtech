@@ -111,9 +111,8 @@ class ta(lcsv.Load_csv):
         self.tilist = dir(talib)
         self.featuredict = {}
         self.tidict = {}
-        print(__name__, "loadfeatures   1")
+
         self.features = self.LoadfeaData(featurescsv)
-        print(__name__, "loadfeatures 2")
 
         def func(value, args):
 
@@ -129,7 +128,7 @@ class ta(lcsv.Load_csv):
                 try:
                     var = str(args) + '-' + str(int(value))  # togenerate name like MA-1,MA-2
                     args_df = pd.Series(self.loadfeaturesdata(var)).dropna().astype('int64').tolist()
-                    print(__name__, "loadfeatures 4")
+
                     self.featuredict[args].extend(args_df)
                     self.tidict[args].append(args_df)
                 except Exception as e:
