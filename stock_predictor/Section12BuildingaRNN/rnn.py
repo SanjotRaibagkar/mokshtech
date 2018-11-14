@@ -26,6 +26,7 @@ symbole = "BANKNIFTY"
 #dataset_train = pd.read_csv('Google_Stock_Price_Train.csv')
 dataset_train = pd.read_csv('banknifty_train_csv.csv')
 training_set = dataset_train.iloc[:, 4:5].values
+noofDays =30
 
 # Feature Scaling
 from sklearn.preprocessing import MinMaxScaler
@@ -35,9 +36,9 @@ training_set_scaled = sc.fit_transform(training_set)
 # Creating a data structure with 60 timesteps and 1 output
 X_train = []
 y_train = []
-for i in range(60, 4418):
+for i in range(60, len(dataset_train)-noofDays-1):
     X_train.append(training_set_scaled[i-60:i, 0])
-    y_train.append(training_set_scaled[i, 0])
+    y_train.append(training_set_scaled[i+noofDays-1, 0])
 X_train, y_train = np.array(X_train), np.array(y_train)
 
 # Reshaping
@@ -79,7 +80,7 @@ regressor.add(Dense(units = 1))
 regressor.compile(optimizer = 'adam', loss = 'mean_squared_error')
 
 # Fitting the RNN to the Training set
-regressor.fit(X_train, y_train, epochs = 50, batch_size = 32)
+regressor.fit(X_train, y_train, epochs = 20, batch_size = 32)
 
 
 
@@ -88,15 +89,15 @@ regressor.fit(X_train, y_train, epochs = 50, batch_size = 32)
 # Getting the real stock price of 2017
 #dataset_test = pd.read_csv('Google_Stock_Price_Test.csv')
 dataset_test = pd.read_csv('banknifty_test_csv.csv')
-real_stock_price = dataset_test.iloc[:, 4:5].values
-
 # Getting the predicted stock price of 2017
 dataset_total = pd.concat((dataset_train['Close'], dataset_test['Close']), axis = 0)
-inputs = dataset_total[len(dataset_total) - len(dataset_test) - 60:].values
+
+real_stock_price = dataset_total.iloc[len(dataset_total)-200:].values
+inputs = dataset_total[len(dataset_total) - 200 - 60:].values
 inputs = inputs.reshape(-1,1)
 inputs = sc.transform(inputs)
 X_test = []
-for i in range(60, 80):
+for i in range(60, 261):
     X_test.append(inputs[i-60:i, 0])
 X_test = np.array(X_test)
 X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
@@ -116,7 +117,7 @@ plt.show()
 from keras.models import model_from_json
 import os
 
-
+symbol = 'BANKNIFTYRNN30'
 # serialize model to JSON
 model_json = regressor.to_json()
 with open("model.json", "w") as json_file:
@@ -141,3 +142,6 @@ print("Saved model to disk")
 #print(score)
 #score = sc.inverse_transform(score)
 #print(score)
+
+
+
