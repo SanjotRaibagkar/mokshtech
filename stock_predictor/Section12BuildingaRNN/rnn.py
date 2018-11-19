@@ -25,8 +25,11 @@ symbole = "BANKNIFTY"
 # Importing the training set
 #dataset_train = pd.read_csv('Google_Stock_Price_Train.csv')
 dataset_train = pd.read_csv('banknifty_train_csv.csv')
-training_set = dataset_train.iloc[:, 4:5].values
-noofDays =30
+training_set = dataset_train.iloc[:, 4:6]
+training_set['Volume'].fillna(training_set['Volume'].mean(),inplace= True )
+noofDays =7
+timestep = 60
+noofUnits = 200
 
 # Feature Scaling
 from sklearn.preprocessing import MinMaxScaler
@@ -36,13 +39,14 @@ training_set_scaled = sc.fit_transform(training_set)
 # Creating a data structure with 60 timesteps and 1 output
 X_train = []
 y_train = []
-for i in range(60, len(dataset_train)-noofDays-1):
-    X_train.append(training_set_scaled[i-60:i, 0])
-    y_train.append(training_set_scaled[i+noofDays-1, 0])
+for i in range(timestep, len(dataset_train)-noofDays-1):
+    X_train.append(training_set_scaled[i-timestep:i, 0:2])
+    y_train.append(training_set_scaled[i:i+noofDays, 0])
+    #y_train.append(training_set_scaled[i+noofDays-1, 0])
 X_train, y_train = np.array(X_train), np.array(y_train)
 
 # Reshaping
-X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1))
+#X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1))
 
 
 
@@ -58,29 +62,30 @@ from keras.layers import Dropout
 regressor = Sequential()
 
 # Adding the first LSTM layer and some Dropout regularisation
-regressor.add(LSTM(units = 50, return_sequences = True, input_shape = (X_train.shape[1], 1)))
+regressor.add(LSTM(units = noofUnits, return_sequences = True, input_shape = (X_train.shape[1], 2)))
 regressor.add(Dropout(0.2))
 
 # Adding a second LSTM layer and some Dropout regularisation
-regressor.add(LSTM(units = 50, return_sequences = True))
+regressor.add(LSTM(units = noofUnits, return_sequences = True))
 regressor.add(Dropout(0.2))
 
 # Adding a third LSTM layer and some Dropout regularisation
-regressor.add(LSTM(units = 50, return_sequences = True))
+regressor.add(LSTM(units = noofUnits, return_sequences = True))
 regressor.add(Dropout(0.2))
 
 # Adding a fourth LSTM layer and some Dropout regularisation
-regressor.add(LSTM(units = 50))
+regressor.add(LSTM(units = noofUnits))
 regressor.add(Dropout(0.2))
 
 # Adding the output layer
-regressor.add(Dense(units = 1))
+
+regressor.add(Dense(units = noofDays))
 
 # Compiling the RNN
 regressor.compile(optimizer = 'adam', loss = 'mean_squared_error')
 
 # Fitting the RNN to the Training set
-regressor.fit(X_train, y_train, epochs = 20, batch_size = 32)
+regressor.fit(X_train, y_train, epochs = 5, batch_size = 32)
 
 
 
@@ -90,23 +95,35 @@ regressor.fit(X_train, y_train, epochs = 20, batch_size = 32)
 #dataset_test = pd.read_csv('Google_Stock_Price_Test.csv')
 dataset_test = pd.read_csv('banknifty_test_csv.csv')
 # Getting the predicted stock price of 2017
-dataset_total = pd.concat((dataset_train['Close'], dataset_test['Close']), axis = 0)
+#dataset_total = pd.concat((dataset_train['Close'], dataset_test['Close']), axis = 0)
+dataset_total = pd.concat((dataset_train, dataset_test), axis = 0)
+inputs =dataset_total.iloc[:, 4:6]
+inputs['Volume'].fillna(inputs['Volume'].mean(),inplace= True )
+real_stock_price = inputs.iloc[len(dataset_total)-noofDays:].values
+inputs = inputs[len(dataset_total) - noofDays - timestep:].values
 
-real_stock_price = dataset_total.iloc[len(dataset_total)-200:].values
-inputs = dataset_total[len(dataset_total) - 200 - 60:].values
-inputs = inputs.reshape(-1,1)
+#inputs = inputs.reshape(-1,1)
 inputs = sc.transform(inputs)
 X_test = []
-for i in range(60, 261):
-    X_test.append(inputs[i-60:i, 0])
+for i in range(timestep, len(inputs)):
+    X_test.append(inputs[i-timestep:i, 0:2])
 X_test = np.array(X_test)
-X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
+#X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
 predicted_stock_price = regressor.predict(X_test)
-predicted_stock_price = sc.inverse_transform(predicted_stock_price)
+predicted_stock_price_all= predicted_stock_price
+#predicted_stock_price = np.insert(predicted_stock_price,obj=1,values=0, axis =1)
+#predicted_stock_price = sc.inverse_transform(predicted_stock_price)
+predicted_stock_price = sc.inverse_transform(predicted_stock_price[:,:2])
+predicted_stcok_price_next_noofDays = predicted_stock_price_all[:1,:]
+
+predicted_stcok_price_next_noofDays.shape = (noofDays,1)
+predicted_stcok_price_next_noofDays = np.insert(predicted_stcok_price_next_noofDays,obj=1,values=0, axis =1)
+predicted_stcok_price_next_noofDays = sc.inverse_transform(predicted_stcok_price_next_noofDays)
 
 # Visualising the results
-plt.plot(real_stock_price, color = 'red', label = 'Real Google Stock Price')
-plt.plot(predicted_stock_price, color = 'blue', label = 'Predicted Google Stock Price')
+plt.plot(real_stock_price[:,0], color = 'red', label = 'Real Google Stock Price')
+plt.plot(predicted_stock_price[:,0], color = 'blue', label = 'Predicted Google Stock Price')
+plt.plot(predicted_stcok_price_next_noofDays[:,0], color = 'green', label = 'Predicted Google Stock Price')
 plt.title('Google Stock Price Prediction')
 plt.xlabel('Time')
 plt.ylabel('Google Stock Price')
@@ -117,7 +134,7 @@ plt.show()
 from keras.models import model_from_json
 import os
 
-symbol = 'BANKNIFTYRNN30'
+symbol = 'BANKNIFTYRNNmulti7'
 # serialize model to JSON
 model_json = regressor.to_json()
 with open("model.json", "w") as json_file:
