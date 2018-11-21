@@ -84,8 +84,8 @@ test_size=0.3
 LSTM_units = 50
 LSTM_unit_increment = 30
 dropoutunit = 0.2
-epochs=20
-batch_size=500
+epochs=2
+batch_size=32
 
 
 ################## Random Forest Property #########################
@@ -102,7 +102,7 @@ gamma=0.3
 
 ##################### Model List ####################################
 modelslist=['SVR','RF','RNN']   # This is list of all the models
-models=['SVR']      # This is list of models to be used at run time.
+models=['RNN']      # This is list of models to be used at run time.
 
 
 ###################Data Unnit ##########################################
