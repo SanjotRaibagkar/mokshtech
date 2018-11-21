@@ -32,6 +32,15 @@ def save_data(DF,file,tempfile,flag):
     finally:
         con.close()
 
+def save_data1(DF,file,tempfile,flag):
+    DF.to_csv(tempfile, header=True,index='Date')
+    if os.path.exists(file):
+        DF.to_csv(file, mode='a',index='Date',header=False)
+    else:
+        DF.to_csv(file, mode='a',index='Date',header=True)
+    print('data saved')
+
+
 
 
 def save_all(indexflag=False,filepath=p.stockdatadelta):
@@ -62,8 +71,8 @@ def down_data(symbfile,symbol='NIFTY',flag=True,startdate=startdate,enddate=date
             delsymfile = symbol + '.csv'
             delsymfilepath = os.path.join(stockdatadelta, delsymfile)
             print(delsymfilepath)
-            dataset_train.to_csv(symbfile, mode='a', index='Date', header=False)
-            #save_data(dataset_train,symbfile,delsymfilepath,flag)
+            #dataset_train.to_csv(symbfile, mode='a', index='Date', header=True)
+            save_data1(dataset_train,symbfile,delsymfilepath,flag)
             print(symbol,' done')
         else:
             print(symbol,startdate,' not sufficient data')

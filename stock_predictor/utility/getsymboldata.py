@@ -37,7 +37,7 @@ def getsymboldata(flag,symbol,begining=False):
      #   pass                # Place holder for 5 mins and 1 min data download code.
     else:
         print('downloading delta data')
-        dw.down_data(symbfile,symbol,flag,startdate=startdate,headerflag=False)
+        dw.down_data(symbfile,symbol,flag,startdate=startdate,headerflag=True)
 
 
 def run_getsymboldata(begining=False):
