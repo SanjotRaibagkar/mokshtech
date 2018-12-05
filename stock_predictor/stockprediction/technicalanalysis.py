@@ -23,7 +23,7 @@ class ta(lcsv.Load_csv):
                 fflag = False
             gs.getsymboldata(fflag, symbol)  # Download Latest Data for the symbol
         except Exception as e:
-            print('getsymbol failed for ', symbol, e)
+            print('getsymbol failed for ', symbol, e.with_traceback())
 
     def loadcsv(self):
 

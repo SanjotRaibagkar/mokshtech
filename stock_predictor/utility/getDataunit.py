@@ -8,7 +8,7 @@ path = "C:\\Prgs\\Code\\mokshtech\\stock_predictor\\database\\stockdata\\SYNDIBA
 def get_dataunit(path,Options):
     df=pd.read_csv(path)
     df['Date']=pd.to_datetime(df['Date'])
-    df = df['Date'].unique().to_list()
+    df = df['Date'].unique().tolist()
     # a=df.iloc[1]
     # b = df.iloc[2]
     # c = df.iloc[3]

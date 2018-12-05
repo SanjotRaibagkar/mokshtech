@@ -1,4 +1,6 @@
 from optionvaluecalculation.optionvalueprop import tb_DerivativeData
+import matplotlib as mpl
+mpl.use('TkAgg')
 from optionvaluecalculation.OptionChain.Implied_Volatility import ImpliedVolatility
 from utility import getstart as gs, filterframe
 from utility.dbutilities.dbqueries import *
@@ -13,6 +15,8 @@ import pandas as pd
 import nsepy
 # from bs4 import BeautifulSoup
 from io import StringIO, BytesIO
+
+
 
 
 
@@ -164,7 +168,9 @@ def appendData():
     #     else:
     #         print('downloading delta data')
     #         startdate = (startdate.year,startdate.day,startdate.month)
+
     latestdate = getlatestDerivative()
+
     if latestdate !=0 :latestdate=datetime.strptime(latestdate,"%d-%b-%Y")  # date from where we need to download
 
     get_year_data(now.year,True,latestdate)

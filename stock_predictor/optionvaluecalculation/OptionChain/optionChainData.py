@@ -19,7 +19,8 @@ except Exception as e:
 
 
 
-PRICE_LIST_URL = 'http://www.nseindia.com/content/historical/EQUITIES/%s/%s/fo%sbhav.csv.zip'
+#PRICE_LIST_URL = 'http://www.nseindia.com/content/historical/EQUITIES/%s/%s/fo%sbhav.csv.zip'
+PRICE_LIST_URL = 'http://www.nseindia.com/content/historical/DERIVATIVES/%s/%s/fo%sbhav.csv.zip'
 
 DERIVATIVE_ARCHIVES = 'http://www.nseindia.com/products/dynaContent/common/productsSymbolMapping.jsp?instrumentType=OPTIDX&symbol=NIFTY&expiryDate=27-07-2006&optionType=CE&strikePrice=&dateRange=week&fromDate=&toDate=&segmentLink=9&symbolCount='
 
@@ -31,6 +32,9 @@ def __raw_zip_data_to_str(data):
     name = zipfile.filelist[0].filename
     return zipfile.read(name)
 
+
+
+# raise error, file is truncated
 
 def date_to_str(d, style='dd-mm-yyyy'):
     if style == 'dd-mm-yyyy':
@@ -107,7 +111,7 @@ def get_year_data(year,Flag=False,Start = date(2018,1,1)):
         try:
             tradingDay.apply(concat_Data)
         except Exception as e:
-            print(e)
+            print(e.with_traceback())
         finally:
             prices = pd.concat(price)
             prices = filterframe.filtered_frame(prices,Options=True)

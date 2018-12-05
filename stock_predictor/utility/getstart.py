@@ -27,12 +27,12 @@ def get_date(symbfile,Options):
         elif len(a) < 2:
             print(symbfile, 'file is empty')
             d = start
-        elif du.get_dataunit(symbfile,Options) >= 1440:
+       # elif du.get_dataunit(symbfile,Options) >= 1440:
             #y, m, n = (a[-1].strip().split(",")[0]).split("-")
-            y, m, n = str(a[-1]).split("-")
-            d = date(int(y), int(m), int(n))
-            d = d + datetime.timedelta(
-                minutes=du.get_dataunit(symbfile,Options))  # append time diff of two datapointsto get next start date
+        #    y, m, n = str(a[-1]).split("-")
+         #   d = date(int(y), int(m), int(n))
+          #  d = d + datetime.timedelta(
+           #     minutes=du.get_dataunit(symbfile,Options))  # append time diff of two datapointsto get next start date
         else:
             d = start
     return d

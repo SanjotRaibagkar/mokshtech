@@ -17,13 +17,13 @@ if __name__ == '__main__':
     # Datas are in a subfolder of the samples. Need to find where the script is
     # because it could have been called from anywhere
     modpath = os.path.dirname(os.path.abspath(sys.argv[0]))
-    datapath = os.path.join(modpath, '../../datas/orcl-1995-2014.txt')
+    #datapath = os.path.join(modpath, '../../datas/orcl-1995-2014.txt')
 
     # Create a Data Feed
     stockdata=p.stockdata
     nifty=os.path.join(stockdata,'NIFTY.csv')
     data= data = bt.feeds.YahooFinanceCSVData(
-        dataname=datapath,
+        #dataname=datapath,
         # Do not pass values before this date
         fromdate=datetime.datetime(2000, 1, 1),
         # Do not pass values after this date
