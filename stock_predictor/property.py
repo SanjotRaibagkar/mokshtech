@@ -30,6 +30,7 @@ if basepathlist[-1] != "stock_predictor" and basepathlist.__contains__("stock_pr
 basepath=("\\").join(basepathlist)
 
 basepath="/Users/sanjotraibagkar/Documents/mokshtech/mokshtech/stock_predictor"
+basepath = "C:/Users/sanjo/mokshtech/mokshtech/stock_predictor"
 print(basepath)
 dbpath=os.path.join(basepath,'database')
 stockdata=os.path.join(dbpath,'stockdata')

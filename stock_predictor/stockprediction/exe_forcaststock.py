@@ -83,7 +83,7 @@ def final_run(symbol='x',predict_days=1):
         else:
             mod_df.apply(funr, axis=1)
      except Exception as e:
-         print('e3',e.with_traceback())
+         print('e3',e.with_traceback(None))
 
 if __name__ == '__main__':
     final_run()

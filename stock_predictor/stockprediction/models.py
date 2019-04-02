@@ -1,8 +1,11 @@
 import numpy as np
 
-from keras.layers.core import Dense, Dropout
-from keras.layers.recurrent import LSTM
-from keras.models import Sequential
+
+from tensorflow.keras import backend
+from tensorflow.python.keras.layers.core import Dense, Dropout
+from tensorflow.python.keras.layers.recurrent import LSTM
+from tensorflow.keras.models import Sequential
+
 from sklearn import neighbors
 from sklearn import svm
 from sklearn.ensemble import AdaBoostClassifier
