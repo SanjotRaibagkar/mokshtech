@@ -74,7 +74,7 @@ mod_reportpath = os.path.join(repobasepath,mod_reportname)
 final_reportpath = os.path.join(repobasepath,final_reportname)
 
 ########Get symboldata property###################################
-y=2015
+y=2011
 m=1
 d=1
 

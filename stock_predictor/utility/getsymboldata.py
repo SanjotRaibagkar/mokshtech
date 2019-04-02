@@ -12,6 +12,7 @@ from utility import downloaddata as dw
 from property import *
 from utility.dbutilities.dbqueries import getlatestStockDate
 from utility.parrallelize import parallelize
+from nsepy.history import get_price_list
 
 
 def getsymboldata(flag,symbol,begining=False):
@@ -42,7 +43,7 @@ def getsymboldata(flag,symbol,begining=False):
 
 def run_getsymboldata(begining=False):
     try:
-        pd.DataFrame(getlatestStockDate(), columns=['SYMBOLS', 'Date']).to_csv('temp_symboldates.csv')
+       # pd.DataFrame(getlatestStockDate(), columns=['SYMBOLS', 'Date']).to_csv('temp_symboldates.csv')
 
         # ind = lambda lst: getsymboldata(True, lst)
         def ind(x):
@@ -59,8 +60,26 @@ def run_getsymboldata(begining=False):
         print('run_getsymboldata',e)
         import traceback
         print(traceback.extract_stack())
+        
+#def getBhavCopyData(dt):
+#    print(dt)
+#    #dt=date(2015,1,1)
+#    prices = get_price_list(dt=dt)
+#    prices['Date'] = dt
+#    delsymfilepath = os.path.join(stockdatadelta,dt.strftime('%m_%d_%Y'))
+#    print(delsymfilepath)
+#    prices.to_csv(delsymfilepath+'.csv', header=True,index='Date')
+#    
+##    if os.path.exists(file):
+##        prices.to_csv(file, mode='a',index='Date',header=False)
+##    else:
+##        prices.to_csv(file, mode='a',index='Date',header=True)
+##    print('data saved')
 
 
 
 if __name__ == '__main__':
-    run_getsymboldata(begining=True)
+#    daterang = pd.date_range(start='1/1/2011', end='1/04/2019')
+#    print(daterang.date)
+#    pd.Series(daterang.date).apply(getBhavCopyData)
+    run_getsymboldata()
