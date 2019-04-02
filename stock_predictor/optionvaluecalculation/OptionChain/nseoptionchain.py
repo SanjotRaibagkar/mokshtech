@@ -78,6 +78,8 @@ def save_data(dbq,con,DF,table,file,tempfile):
         con.commit()
         return con
 
+
+    
 def get_year_data(startDate,Flag=False,Start = date(2018,1,1)):
     """
     :param startDate: year and month  of Data
@@ -87,7 +89,7 @@ def get_year_data(startDate,Flag=False,Start = date(2018,1,1)):
     """
     year =  startDate[0]
     month = startDate[1]
-   
+    Flag = False
     now = datetime.now()
     if Flag :
         m = range(now.month,now.month+1)
@@ -112,6 +114,7 @@ def get_year_data(startDate,Flag=False,Start = date(2018,1,1)):
                 tradingDay=get_tradingDay(start,end)
             except Exception as e:
                 print("nseoptions error 2 ", e)
+                
             filename=str("prices_")+str(year)+"_"+str(i)+".csv"
             fname = os.path.join(p.optiondata,filename)
             fname_day = os.path.join(p.optiondata_day,filename)
@@ -125,19 +128,36 @@ def get_year_data(startDate,Flag=False,Start = date(2018,1,1)):
                 price_df = get_price_list(dt=x)
                 if not price_df.empty:
                     price_df = filterframe.filtered_frame(price_df, Options=True)
+                    
                     save_data(dbq, con, price_df, tb_DerivativeData, fname, fname_day)
                    # implobj = ImpliedVolatility(Dframe=price_df, DfFlag=True, dbq=dbq, conn=con)
                     #implobj.getStrike()
                 else:
                     print("no data to recieve for ",x)
+            def concat_Data_csv(x):
+                print(x)
+                price_df = get_price_list(dt=x)
+                if not price_df.empty:
+                    price_df = filterframe.filtered_frame(price_df, Options=True)
+                    price_df.to_csv(fname,mode='a')
+                    #save_data(dbq, con, price_df, tb_DerivativeData, fname, fname_day)
+                   # implobj = ImpliedVolatility(Dframe=price_df, DfFlag=True, dbq=dbq, conn=con)
+                    #implobj.getStrike()
+                else:
+                    print("no data to recieve for ",x)
+             
             try:
-                dbq = db_queries()
-                con = dbq.create_connection()
-                tradingDay.apply(concat_Data,args=(dbq,con,))
+                #dbq = db_queries()
+                #con = dbq.create_connection()
+               # tradingDay.apply(concat_Data,args=(dbq,con,))
+                 tradingDay.apply(concat_Data_csv)
+               
+                
             except Exception as e:
                 print("nseoptionchain 4 ", e)
-            finally:
-                dbq.close_conn(conn=con)
+                
+           # finally:
+                #dbq.close_conn(conn=con)
 
 
 
@@ -181,7 +201,8 @@ def appendData():
     get_year_data(now.year,True,latestdate)
 
 
-years_series=pd.Series([(2018,11)])
+#years_series=pd.Series([(2016,1),(2017,1),(2018,1),(2019,1)])
+years_series=pd.Series([(2019,1)])
 if __name__ == '__main__':
     years_series.apply(get_year_data)
     #appendData()
