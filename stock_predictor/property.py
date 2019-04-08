@@ -103,7 +103,7 @@ gamma=0.3
 
 ##################### Model List ####################################
 modelslist=['SVR','RF','RNN']   # This is list of all the models
-models=['RNN']      # This is list of models to be used at run time.
+models=['RF']      # This is list of models to be used at run time.
 
 
 ###################Data Unnit ##########################################

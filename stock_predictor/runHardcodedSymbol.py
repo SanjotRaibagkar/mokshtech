@@ -1,7 +1,7 @@
 from stockprediction import exe_predictstock as ex_p
 from stockprediction import exe_forcaststock as fs
 
-model=['RNN']
+model=['RF']
 
 if __name__ == '__main__':
     ex_p.predictstock("BANKNIFTY")

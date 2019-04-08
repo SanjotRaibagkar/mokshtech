@@ -15,17 +15,23 @@ from utility.parrallelize import parallelize
 from nsepy.history import get_price_list
 
 
+
+
 def getsymboldata(flag,symbol,begining=False):
     print(symbol)
     '''This is only for the development purpose. Idea is to fetch data via frontend code and dump in csv.
     till the time that code is ready we will use this. Once frontend gets ready we will retire code'''
     symbfile = os.path.join(stockdata,symbol+'.csv')
     startdate = gs.get_startdate(symbfile,symbol,flag) # date from where we need to download
+    print("start date found is ", startdate)
+    
 
     if begining: startdate = None
     if startdate is None:
         startdate = date(p.y,p.m,p.d)
         print('startdate', startdate)
+    else:
+        startdate =datetime.datetime.strptime(startdate, "%Y-%m-%d").date()
 
     datediff = ((date.today()-startdate).seconds)//60
 
@@ -69,6 +75,9 @@ def run_getsymboldata(begining=False):
 #    delsymfilepath = os.path.join(stockdatadelta,dt.strftime('%m_%d_%Y'))
 #    print(delsymfilepath)
 #    prices.to_csv(delsymfilepath+'.csv', header=True,index='Date')
+
+
+
 #    
 ##    if os.path.exists(file):
 ##        prices.to_csv(file, mode='a',index='Date',header=False)
@@ -82,4 +91,4 @@ if __name__ == '__main__':
 #    daterang = pd.date_range(start='1/1/2011', end='1/04/2019')
 #    print(daterang.date)
 #    pd.Series(daterang.date).apply(getBhavCopyData)
-    run_getsymboldata()
+   getsymboldata(True,symbol='BANKNIFTY')
