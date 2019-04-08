@@ -44,7 +44,7 @@ def getsymboldata(flag,symbol,begining=False):
 
     if datediff == 0: # for days the above statement will give zero so calculate once more
         datediff = ((date.today()-startdate).days)*24*60*60
-        print("datediff",datediff)
+        print("datediff",date)
     if datediff == 0:
         print('updated data present')
     #elif 1 < datediff < 1440 :
