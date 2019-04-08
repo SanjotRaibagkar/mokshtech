@@ -59,7 +59,7 @@ def down_data(symbfile,symbol='NIFTY',flag=True,startdate=startdate,enddate=date
                             start=startdate,
                             end=date.today(),
                             index=flag))
-        if len(list(dataset_train.index.values)) > 2:
+        if len(list(dataset_train.index.values)) >= 1:
 
             if flag:  # insert symbol column for index data. bydefault nse do not returns symbol column.
                 dataset_train['Symbol'] = symbol

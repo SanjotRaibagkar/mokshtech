@@ -31,13 +31,20 @@ def getsymboldata(flag,symbol,begining=False):
         startdate = date(p.y,p.m,p.d)
         print('startdate', startdate)
     else:
-        startdate =datetime.datetime.strptime(startdate, "%Y-%m-%d").date()
+        try :
+            startdate =datetime.datetime.strptime(startdate, "%Y-%m-%d").date()
+        except ValueError :
+             startdate =datetime.datetime.strptime(startdate, "%d-%m-%Y").strftime("%Y-%m-%d")
+             startdate =datetime.datetime.strptime(startdate, "%Y-%m-%d").date()
+            # print(datetime.datetime.strptime(startdate, "%Y-%m-%d"))
+             print((date.today()-startdate))
 
     datediff = ((date.today()-startdate).seconds)//60
+  
 
     if datediff == 0: # for days the above statement will give zero so calculate once more
         datediff = ((date.today()-startdate).days)*24*60*60
-
+        print("datediff",datediff)
     if datediff == 0:
         print('updated data present')
     #elif 1 < datediff < 1440 :
