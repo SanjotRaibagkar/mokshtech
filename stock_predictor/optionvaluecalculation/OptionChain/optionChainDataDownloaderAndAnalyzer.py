@@ -1,14 +1,15 @@
 
 import requests
-import json
+import json]
 #import logging
 #import http.client
 import pandas as pd
 import xlwings as xw
 from time import sleep
-from datetime import datetime
+from datetime import datetime,time,timedelta
 import os
 import property as p
+import numpy as np
 
 pd.set_option("display.width",1500)
 pd.set_option("display.max_columns",75)
@@ -17,7 +18,10 @@ pd.set_option("display.max_rows",150)
 
 
 request_url = "https://www.nseindia.com/api/option-chain-indices?symbol=NIFTY"
+banknifyurl = f"https://www.nseindia.com/api/option-chain-indices?symbol=BANKNIFTY"
+nifyurl = f"https://www.nseindia.com/api/option-chain-indices?symbol=NIFTY"
 expiry = "08-Apr-2021"
+#expiry =None
 excle_file= "option_chain_analysis.xlsx"
 wb = xw.books(excle_file)
 oidata_sheet = wb.sheets("oidata")
@@ -26,13 +30,24 @@ df_list=[]
 mp_list= []
 #oi_data_file = os.path.join(p.optionchaindata,"oi_data_records_{0}.json".format(datetime.now().strftime("%d%m%y")))
 #oi_data_file = os.path.normpath(oi_data_file)
+
 oi_data_file = "oi_data_records_{0}.json".format(datetime.now().strftime("%d%m%y"))
 mp_data_file = "mp_data_records_{0}.json".format(datetime.now().strftime("%d%m%y"))
 
-def fetchChainData():
 
+
+timeFrame = 1
+loadFromFile = False
+
+def symbolandURL()
+    symbol_dir = {"NIFTY" : nifyurl,"BANKNIFTY" : banknifyurl}
+    return symbol, url
+
+def fetchChainData(url ,symbol):
+    all_chain_data = "all_day_oi_data_records_{0}_{1}.json".format(symbol,datetime.now().strftime("%d%m%y"))
     url_oc = "https://www.nseindia.com/option-chain"
-    url = f"https://www.nseindia.com/api/option-chain-indices?symbol=BANKNIFTY"
+    url = url
+  # url = f"https://www.nseindia.com/api/option-chain-indices?symbol=BANKNIFTY"
     headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, '
                              'like Gecko) '
                              'Chrome/80.0.3987.149 Safari/537.36',
@@ -41,10 +56,11 @@ def fetchChainData():
     request = session.get(url_oc, headers=headers, timeout=5)
     cookies = dict(request.cookies)
     response = session.get(url, headers=headers, timeout=5, cookies=cookies)
-    print(response.json())
+    #print(response.json())
 
-    with open("bankniftyoidata.json","w") as files:
+    with open(all_chain_data,"a") as files:
         files.write(json.dumps(response.json(),indent=4,sort_keys=True))
+    return response.json(),all_chain_data
 
 def readJson(filename):
     with open(filename,"r") as files:
@@ -59,9 +75,11 @@ def loadandAnalyzeChainData(df,mp_df,requestdata):
     while tries <= maxtries:
         try:
             if expiry:
+                print("expire provided")
                 ce_values = [data['CE'] for data in requestdata['records']['data'] if 'CE' in data and str(data['expiryDate']).lower() ==str(expiry).lower()]
                 pe_values = [data['PE'] for data in requestdata['records']['data'] if 'PE' in data and str(data['expiryDate']).lower() ==str(expiry).lower()]
             else:
+                print("expire not provided")
                 ce_values = [data['CE'] for data in requestdata['filtered']['data'] if 'CE' in data]
                 pe_values = [data['PE'] for data in requestdata['filtered']['data'] if 'PE' in data]
             ce_data = pd.DataFrame(ce_values)
@@ -98,18 +116,21 @@ def loadandAnalyzeChainData(df,mp_df,requestdata):
             df3 = pd.DataFrame(mp_dict).transpose()
             mp_df = pd.concat([mp_df,df3])
             wb.sheets["mpdata"].range("A1").options(headers = False).value = mp_df
-            with open(mp_data_file, "w") as files:
-                files.write(json.dumps(mp_df.to_dict(), indent=4, sort_keys=True))
+
+
 
             df = pd.concat([df,df1])
             df_list.append(df1.to_dict('records'))
+            with open(mp_data_file, "w") as files:
+                files.write(json.dumps(mp_df.to_dict(), indent=4, sort_keys=True))
+
             with open(oi_data_file, "w") as files:
                 files.write(json.dumps(df_list, indent=4, sort_keys=True))
 
             return  df,mp_df
         except Exception as error:
-            print("Error executing error {0}".format(error)
-            tries+=1
+            print("Error executing error {0}".format(error))
+            tries = tries+1
             sleep(10)
             continue
 
@@ -139,13 +160,38 @@ def main():
         mp_list =[]
         mp_df =pd.DataFrame()
 
-    #fetchChainData()
-    data = readJson("bankniftyoidata.json")
-    df,mp_df = loadandAnalyzeChainData(df,mp_df,data)
-    if not df.empty:
-        df["impliedVolatility"] = df["impliedVolatility"].replace(to_replace=0,method='bfill').values
-        df['idetifire'] = df['strikePrice'].astype(str)+df['type']
-        main_sheet.range("A1").value = df
+
+    print("time now is ",datetime.now())
+
+    while time(9,15) <= datetime.now().time() <= time(15,30):
+        timenow = datetime.now()
+        check = True if timenow.minute/timeFrame in list(np.arange(0.0, 60.0)) else False
+
+        if check:
+            if loadFromFile:
+                data = readJson("all_day_oi_data_records_BANKNIFTY_290321.json")
+            else:
+                jsondata, filename = fetchChainData(banknifyurl, "BANKNIFTY")
+                print("filename is ", filename)
+                data = jsondata
+
+
+
+            nextScan = timenow + timedelta(minutes=timeFrame)
+
+            df,mp_df = loadandAnalyzeChainData(df,mp_df,data)
+
+            if not df.empty:
+                df["impliedVolatility"] = df["impliedVolatility"].replace(to_replace=0,method='bfill').values
+                df['idetifire'] = df['strikePrice'].astype(str)+df['type']
+                main_sheet.range("A1").value = df
+                waitSec =  int((nextScan-datetime.now()).seconds)
+                print("wait for seconds {0}".format(waitSec))
+                sleep(waitSec) if waitSec >0 else sleep(0)
+            else:
+                print("no data received")
+                sleep(30)
+
 
 
 if __name__ == "__main__":
