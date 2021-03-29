@@ -1,5 +1,8 @@
 from optionvaluecalculation.optionvalueprop import tb_DerivativeData
 import matplotlib as mpl
+
+from stock_predictor.utility.dbutilities.dbqueries import getlatestDerivative
+
 mpl.use('TkAgg')
 from optionvaluecalculation.OptionChain.Implied_Volatility import ImpliedVolatility
 from utility import getstart as gs, filterframe
@@ -16,14 +19,8 @@ import nsepy
 # from bs4 import BeautifulSoup
 from io import StringIO, BytesIO
 
-
-
-
-
-
-
-
-PRICE_LIST_URL = 'http://www.nseindia.com/content/historical/DERIVATIVES/%s/%s/fo%sbhav.csv.zip'
+PRICE_LIST_URL = 'http://www1.nseindia.com/content/historical/DERIVATIVES/%s/%s/fo%sbhav.csv.zip'
+PRICE_LIST_URL = 'http://www1.nseindia.com/content/historical/DERIVATIVES/%s/%s/fo%sbhav.csv.zip'
 
 DERIVATIVE_ARCHIVES = 'http://www.nseindia.com/products/dynaContent/common/productsSymbolMapping.jsp?instrumentType=OPTIDX&symbol=NIFTY&expiryDate=27-07-2006&optionType=CE&strikePrice=&dateRange=week&fromDate=&toDate=&segmentLink=9&symbolCount='
 
@@ -49,9 +46,30 @@ def get_price_list(dt, proxies={}):
     yy = dt_str[5:9]
     mm = dt_str[2:5].upper()
     url = PRICE_LIST_URL % (yy, mm, dt_str.upper())
-    resp = req.get(url=url, proxies=proxies)
+    print("nseoptions error 5" ,url)
+    hdr = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*,q=0.8,application/signed-exchange;v=b3;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept-Language': 'en-IN,en;q=0.9,en-GB;q=0.8,en-US;q=0.7,hi;q=0.6',
+        'Connection': 'keep-alive', 'Host': 'www1.nseindia.com',
+        'Cache-Control': 'max-age=0',
+        'Host': 'www1.nseindia.com',
+        'Referer': 'https://www1.nseindia.com/products/content/derivatives/equities/fo.htm',
+        }
+    cookie_dict = {
+        'bm_sv': 'E2109FAE3F0EA09C38163BBF24DD9A7E~t53LAJFVQDcB/+q14T3amyom/sJ5dm1gV7z2R0E3DKg6WiKBpLgF0t1Mv32gad4CqvL3DIswsfAKTAHD16vNlona86iCn3267hHmZU/O7DrKPY73XE6C4p5geps7yRwXxoUOlsqqPtbPsWsxE7cyDxr6R+RFqYMoDc9XuhS7e18='}
+    session = req.session()
+    for cookie in cookie_dict:
+        session.cookies.set(cookie, cookie_dict[cookie])
+
+    resp = req.get(url=url, proxies=proxies,headers=hdr)
+    #print(resp.content)
     try:
         df = pd.read_csv(StringIO(str(__raw_zip_data_to_str(resp.content), 'utf-8')))
+        #df = pd.read_csv(StringIO( unicode(__raw_zip_data_to_str(resp.content))))
         df = df.rename(columns={"TIMESTAMP": "Date"})
         return df
     except Exception as e:
@@ -80,13 +98,14 @@ def save_data(dbq,con,DF,table,file,tempfile):
 
 
     
-def get_year_data(startDate,Flag=False,Start = date(2018,1,1)):
+def get_year_data(startDate,Flag=False,Start = date(2021,1,1)):
     """
     :param startDate: year and month  of Data
     :param Flag: if True then append data and skip downloading complete Data
     :param start: if Flag is true, then start date of data
     :return: None. It directly writes data to csv
     """
+    print(startDate)
     year =  startDate[0]
     month = startDate[1]
     Flag = False
@@ -112,13 +131,18 @@ def get_year_data(startDate,Flag=False,Start = date(2018,1,1)):
             print(start,end)
             try:
                 tradingDay=get_tradingDay(start,end)
+               # print("nseoptionchain 12",tradingDay)
             except Exception as e:
                 print("nseoptions error 2 ", e)
                 
             filename=str("prices_")+str(year)+"_"+str(i)+".csv"
             fname = os.path.join(p.optiondata,filename)
+            fname = os.path.normpath(fname)
             fname_day = os.path.join(p.optiondata_day,filename)
+            fname_day = os.path.normpath( fname_day)
+            print("nseoptionchain 13", p.optiondata,fname)
             #price=[]
+
             # if Flag and os.path.isfile(fname):
             #     old_prices = pd.read_csv(fname)
             #     old_prices.rename(columns={"TIMESTAMP": "Date"})
@@ -135,29 +159,36 @@ def get_year_data(startDate,Flag=False,Start = date(2018,1,1)):
                 else:
                     print("no data to recieve for ",x)
             def concat_Data_csv(x):
-                print(x)
+                print("nseoptionchain 8",x)
                 price_df = get_price_list(dt=x)
                 if not price_df.empty:
                     price_df = filterframe.filtered_frame(price_df, Options=True)
+                    print("nseoptionchain 10", fname)
                     price_df.to_csv(fname,mode='a')
+
                     #save_data(dbq, con, price_df, tb_DerivativeData, fname, fname_day)
                    # implobj = ImpliedVolatility(Dframe=price_df, DfFlag=True, dbq=dbq, conn=con)
                     #implobj.getStrike()
                 else:
                     print("no data to recieve for ",x)
-             
+   ##
+    ##tradingDay.apply(concat_Data_csv)
+
             try:
                 #dbq = db_queries()
                 #con = dbq.create_connection()
-               # tradingDay.apply(concat_Data,args=(dbq,con,))
-                 tradingDay.apply(concat_Data_csv)
-               
-                
+                #tradingDay.apply(concat_Data,args=(dbq,con,))
+                #print("nseoptionchain 11", tradingDay)
+                tradingDay.apply(concat_Data_csv)
+
             except Exception as e:
                 print("nseoptionchain 4 ", e)
                 
            # finally:
+
                 #dbq.close_conn(conn=con)
+
+
 
 
 
@@ -165,9 +196,11 @@ def get_year_data(startDate,Flag=False,Start = date(2018,1,1)):
 
 def appendData():
     now = datetime.now()
+    print("nseoptionchain 7", p.optiondata_day)
     for d,s,files in os.walk(p.optiondata_day):
         for f in files:
             fnme = os.path.join(p.optiondata_day,f)
+            print("nseoptionchain 6",fnme)
             if fnme.startswith("prices_"):
                 os.remove(fnme)
     # name = str("prices_") + str(now.year) + "_" + str(now.month) + ".csv"
@@ -195,16 +228,17 @@ def appendData():
     #         startdate = (startdate.year,startdate.day,startdate.month)
 
     latestdate = getlatestDerivative()
-
-    if latestdate !=0 :latestdate=datetime.strptime(latestdate,"%d-%b-%Y")  # date from where we need to download
+    latestdate="01-01-2021"
+    if latestdate !=0 :latestdate=datetime.strptime(latestdate,"%d-%m-%Y")  # date from where we need to download
 
     get_year_data(now.year,True,latestdate)
 
 
 #years_series=pd.Series([(2016,1),(2017,1),(2018,1),(2019,1)])
-years_series=pd.Series([(2019,4)])
+years_series=pd.Series([(2019,4),(2020,1)])
 if __name__ == '__main__':
     years_series.apply(get_year_data)
     #appendData()
+
 
 
