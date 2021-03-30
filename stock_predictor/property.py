@@ -30,17 +30,23 @@ if basepathlist[-1] != "stock_predictor" and basepathlist.__contains__("stock_pr
 basepath=("\\").join(basepathlist)
 
 basepath="/Users/sanjotraibagkar/Documents/mokshtech/mokshtech/stock_predictor"
-basepath = "C:/Users/sanjo/mokshtech/mokshtech/stock_predictor"
+basepath = "C:/Users/sanjo/PycharmProjects/mokshtech/stock_predictor"
+
 print(basepath)
 dbpath=os.path.join(basepath,'database')
+print("dbpath",dbpath)
+
+print("normdbpath",os.path.normpath(dbpath))
 stockdata=os.path.join(dbpath,'stockdata')
 stockdatadelta = os.path.join(dbpath,'stockdata_delta')
 optiondata = os.path.join(dbpath,'optiondata')
 optiondata_day = os.path.join(dbpath,'optiondata_day')
 symbollist = os.path.join(dbpath,'symbollist.csv')
-
+optionchaindata = os.path.join(optiondata,"optionchain")
+print(symbollist)
+symbollist = "C:/Users/sanjo/PycharmProjects/mokshtech/stock_predictor/database/SymboLlist.csv"
 strategies_p = os.path.join(basepath,'optionvaluecalculation','strategies')
-
+print("again",symbollist)
 
 sqldb = os.path.join(dbpath,'sqlite')
 #stockdata=os.path.join(dbpath,'stockdata_1')

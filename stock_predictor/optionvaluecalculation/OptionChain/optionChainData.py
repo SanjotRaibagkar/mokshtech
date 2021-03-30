@@ -5,7 +5,7 @@ try:
     from calendar import monthrange
     import os
     from utility import getstart as gs, filterframe
-    from utility.dbutilities import dbqueries as dbq
+    #from utility.dbutilities import dbqueries as dbq
     import property as p
     import numpy as np
     import pandas as pd

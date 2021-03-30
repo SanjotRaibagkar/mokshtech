@@ -19,6 +19,7 @@ from nsepy.history import get_price_list
 
 def getsymboldata(flag,symbol,begining=False):
     print(symbol)
+    print("in get symbol data ")
     '''This is only for the development purpose. Idea is to fetch data via frontend code and dump in csv.
     till the time that code is ready we will use this. Once frontend gets ready we will retire code'''
     symbfile = os.path.join(stockdata,symbol+'.csv')

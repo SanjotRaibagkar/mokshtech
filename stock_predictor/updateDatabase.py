@@ -4,7 +4,7 @@ import numpy as np
 from multiprocessing import Pool
 
 from utility import getsymboldata
-from optionvaluecalculation.OptionChain import nseoptionchain
+from optionvaluecalculation.OptionChain import nsebhavcopydownloader
 # def test():
 #     num_cores = multiprocessing.cpu_count()
 #     a,b = [nseoptionchain.appendData(),getsymboldata.run_getsymboldata()]
@@ -19,9 +19,9 @@ from optionvaluecalculation.OptionChain import nseoptionchain
 #
 # test()
 
-years_series=pd.Series([2018])
+years_series=pd.Series([2021])
 if __name__ == '__main__':
-    nseoptionchain.appendData()
+    nsebhavcopydownloader.appendData()
     getsymboldata.run_getsymboldata()
 
 
