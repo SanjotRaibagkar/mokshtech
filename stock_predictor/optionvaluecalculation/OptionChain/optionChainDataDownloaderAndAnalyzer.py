@@ -170,9 +170,10 @@ def main():
         mp_df =pd.DataFrame()
 
 
+
     print("time now is ",datetime.now())
 
-    while time(9,15) <= datetime.now().time() <= time(15,30):
+    while time(9,14) <= datetime.now().time() <= time(15,32):
         timenow = datetime.now()
         check = True if timenow.minute/timeFrame in list(np.arange(0.0, 20.0)) else False
 
@@ -183,8 +184,6 @@ def main():
                 jsondata, filename = fetchChainData(banknifyurl, "BANKNIFTY")
                 print("filename is ", filename)
                 data = jsondata
-
-
 
             nextScan = timenow + timedelta(minutes=timeFrame)
 

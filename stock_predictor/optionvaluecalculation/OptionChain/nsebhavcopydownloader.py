@@ -227,7 +227,7 @@ def appendData():
     #         print('downloading delta data')
     #         startdate = (startdate.year,startdate.day,startdate.month)
 
-    latestdate = getlatestDerivative()
+    #latestdate = getlatestDerivative()
     latestdate="01-01-2021"
     if latestdate !=0 :latestdate=datetime.strptime(latestdate,"%d-%m-%Y")  # date from where we need to download
 
