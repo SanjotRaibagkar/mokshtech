@@ -26,6 +26,8 @@ expiry = "08-Apr-2021"
 excle_file= "option_chain_analysis.xlsx"
 wb = xw.books(excle_file)
 oidata_sheet = wb.sheets("oidata")
+
+
 main_sheet = wb.sheets("maindata")
 df_list=[]
 mp_list= []
@@ -75,7 +77,7 @@ def loadandAnalyzeChainData(df,mp_df,requestdata):
     maxtries =0
     while tries <= maxtries:
         try:
-            expirly_list= ['01-Apr-2021', '08-Apr-2021',  '29-Apr-2021']
+            expirly_list= ['08-Apr-2021', '15-Apr-2021',  '29-Apr-2021']
             print("Expiry list is " ,expirly_list)
             for expirday in expirly_list :
                 if expirly_list.index(expirday)==0:
@@ -172,33 +174,33 @@ def main():
 
 
     print("time now is ",datetime.now())
+    while (True):
+        while time(9,14) <= datetime.now().time() <= time(15,32):
+            timenow = datetime.now()
+            check = True if timenow.minute/timeFrame in list(np.arange(0.0, 20.0)) else False
 
-    while time(9,14) <= datetime.now().time() <= time(15,32):
-        timenow = datetime.now()
-        check = True if timenow.minute/timeFrame in list(np.arange(0.0, 20.0)) else False
+            if check:
+                if loadFromFile:
+                    data = readJson("all_day_oi_data_records_BANKNIFTY_290321.json")
+                else:
+                    jsondata, filename = fetchChainData(banknifyurl, "BANKNIFTY")
+                    print("filename is ", filename)
+                    data = jsondata
 
-        if check:
-            if loadFromFile:
-                data = readJson("all_day_oi_data_records_BANKNIFTY_290321.json")
-            else:
-                jsondata, filename = fetchChainData(banknifyurl, "BANKNIFTY")
-                print("filename is ", filename)
-                data = jsondata
+                nextScan = timenow + timedelta(minutes=timeFrame)
 
-            nextScan = timenow + timedelta(minutes=timeFrame)
+                df,mp_df = loadandAnalyzeChainData(df,mp_df,data)
 
-            df,mp_df = loadandAnalyzeChainData(df,mp_df,data)
-
-            if not df.empty:
-                df["impliedVolatility"] = df["impliedVolatility"].replace(to_replace=0,method='bfill').values
-                df['idetifire'] = df['strikePrice'].astype(str)+df['type']
-                main_sheet.range("A1").value = df
-                waitSec =  int((nextScan-datetime.now()).seconds)
-                print("wait for seconds {0}".format(waitSec))
-                sleep(waitSec) if waitSec >0 else sleep(0)
-            else:
-                print("no data received")
-                sleep(30)
+                if not df.empty:
+                    df["impliedVolatility"] = df["impliedVolatility"].replace(to_replace=0,method='bfill').values
+                    df['idetifire'] = df['strikePrice'].astype(str)+df['type']
+                    main_sheet.range("A1").value = df
+                    waitSec =  int((nextScan-datetime.now()).seconds)
+                    print("wait for seconds {0}".format(waitSec))
+                    sleep(waitSec) if waitSec >0 else sleep(0)
+                else:
+                    print("no data received")
+                    sleep(30)
 
 
 
