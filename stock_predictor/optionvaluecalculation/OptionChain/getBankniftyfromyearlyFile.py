@@ -84,7 +84,7 @@ def  buildCombinedFuturePrice(symbol ) :
     print(symbolfutureDF.shape)
     symbolfutureDF.to_csv(p.optiondata + '/' + symbol + "FUTIDX"+ '.csv', header=True)
 if __name__ == '__main__':
-  years_list = [2016,2017,2018,2019,2020,2021]
+  years_list = [2019]
   for i in years_list:
     createCSVFileFromBhavCopy('NIFTY',str(i))
 

@@ -78,7 +78,7 @@ def loadandAnalyzeChainData(df,mp_df,requestdata):
     maxtries =0
     while tries <= maxtries:
         try:
-            expirly_list= ['08-Apr-2021', '15-Apr-2021',  '29-Apr-2021']
+            expirly_list= [ '22-Apr-2021',  '29-Apr-2021']
             print("Expiry list is " ,expirly_list)
             for expirday in expirly_list :
                 if expirly_list.index(expirday)==0:
