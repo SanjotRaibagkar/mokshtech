@@ -86,7 +86,7 @@ def  buildCombinedFuturePrice(symbol ) :
 if __name__ == '__main__':
   years_list = [2019]
   for i in years_list:
-    createCSVFileFromBhavCopy('NIFTY',str(i))
+    createCSVFileFromBhavCopy('BANKNIFTY',str(i))
 
 
   # symobldf = buildandBackTestFVStatergy('BANKNIFTY','2018')
