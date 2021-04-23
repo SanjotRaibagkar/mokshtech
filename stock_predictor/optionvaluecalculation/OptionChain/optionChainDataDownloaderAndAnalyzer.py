@@ -78,7 +78,7 @@ def loadandAnalyzeChainData(df,mp_df,requestdata):
     maxtries =0
     while tries <= maxtries:
         try:
-            expirly_list= [ '22-Apr-2021',  '29-Apr-2021']
+            expirly_list= [ '29-Apr-2021','06-May-2021']
             print("Expiry list is " ,expirly_list)
             for expirday in expirly_list :
                 if expirly_list.index(expirday)==0:
@@ -176,7 +176,7 @@ def main():
 
     print("time now is ",datetime.now())
     while (True):
-        while time(9,14) <= datetime.now().time() <= time(15,32):
+        while time(6,14) <= datetime.now().time() <= time(15,32):
             timenow = datetime.now()
             check = True if timenow.minute/timeFrame in list(np.arange(0.0, 20.0)) else False
 
