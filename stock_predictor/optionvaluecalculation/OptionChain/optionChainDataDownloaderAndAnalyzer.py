@@ -74,11 +74,12 @@ def readJson(filename):
 
 def loadandAnalyzeChainData(df,mp_df,requestdata):
     #print(requestdata)
+
     tries = 0
     maxtries =0
     while tries <= maxtries:
         try:
-            expirly_list= [ '29-Apr-2021','06-May-2021']
+            expirly_list= [ '06-May-2021','12-May-2021','27-May-2021']
             print("Expiry list is " ,expirly_list)
             for expirday in expirly_list :
                 if expirly_list.index(expirday)==0:
@@ -189,6 +190,7 @@ def main():
                     data = jsondata
 
                 nextScan = timenow + timedelta(minutes=timeFrame)
+
 
                 df,mp_df = loadandAnalyzeChainData(df,mp_df,data)
 
